@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "data": {
+    "kpis": {
+      "totalApprovals": 420,
+      "approvalRate": 21.0,
+      "topBank": { "name": "HDFC", "rate": 28.5 },
+      "avgProcessingDays": 4.6
+    },
+    "banks": [
+      { "bank": "HDFC", "total": 1200, "approved": 342, "rate": 28.5, "avgDays": 4.2 },
+      { "bank": "Axis", "total": 800, "approved": 120, "rate": 15.0, "avgDays": 5.4 },
+      { "bank": "ICICI", "total": 600, "approved": 90, "rate": 15.0, "avgDays": 5.0 }
+    ]
+  },
+  "meta": { "version": "v1" }
+}
+

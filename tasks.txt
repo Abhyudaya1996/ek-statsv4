@@ -1,0 +1,39 @@
+EK STATS – BUILD PLAN (PRD v4.1)
+
+PREP (YOU ARE HERE – DO NOT CODE FEATURES)
+[ ] T0: Ingest PRD (docs/PRD_updated.md). Summarize key contracts: STAGE_CODES (§3), API response shape (§7), filters (§8), accessibility (§5), perf budgets (§10), mock-first workflow (§1).
+[ ] T1: Create folder structure & placeholders (see chat instruction).
+[ ] T2: Commit control files: .cursorrules, tasks.txt.
+
+PHASE 1 – UI WITH MOCK DATA (NO API CALLS)
+[ ] T3: Global scaffolding – Header, mobile bottom nav, responsive container. Reference §12, §13.
+[ ] T4: Global FilterBar (context + provider) per §8 (timeRange presets current/last3/last6; banks, cards (dependent), quality). Validate start<=end (return UI inline error).
+[ ] T5: Reusable UI components: KPICard (with trend, aria-labels), Skeletons, EmptyState, DataTable (desktop table + mobile cards). §13 + §5.
+[ ] T6: Homepage (Dashboard) using /mock-data/dashboard.json. KPIs: totalLeads, potentialCommission (10%), approvalRate (“—” on 0/0), incomplete. Commission donut. §6.1.
+[ ] T7: Funnel Report using /mock-data/funnel.json. Horizontal funnel (Clicks→Leads→stage buckets), Quality table (Good/Avg/Bad/Unknown), bottom insights; division-by-zero → “—”. §6.2.
+[ ] T8: Detailed Leads with mock: search (debounce 300ms), tabs (All/Incomplete/KYC/Verification/Approved/Rejected), pagination 50/page, export CSV/Excel (client-side from mock). §6.3.
+[ ] T9: Approval Report (mock): KPIs + combo chart (bars total/approved + line rate%), top banks table. §6.4.
+[ ] T10: Rejection Report (mock): KPIs + bank-wise rejection chart + reasons table (% of total leads, not % of rejects). §6.5.
+[ ] T11: Timeline (mock): Month view table → drill to day view; toggle numbers/percentages. §6.6.
+
+PHASE 2 – API & DATA
+[ ] T12: Supabase client & types; Zod schemas; ApiResponse format enforcement. §7, §11.
+[ ] T13: Implement /api/v1/dashboard/* backed by `mv_dashboard_kpis` materialized view; add indexes from §3.
+[ ] T14: Implement /api/v1/leads/funnel (join exitclicks→Raw on clean_exit; exclude NULL joins). §4, §7.2.
+[ ] T15: Implement /api/v1/leads/detailed with server-side pagination, search across name/id/bank/card, and filters. §7.2.
+[ ] T16: Implement /api/v1/reports/{approval,rejection}. Handle NULL dates (avg processing shows “—”). §7.3.
+[ ] T17: Wire UI to APIs; preserve all empty/loading/error states; keep mock data fallback behind a flag.
+
+QUALITY, PERF, ACCESSIBILITY
+[ ] T18: Add Playwright happy-path E2E (dashboard → funnel → detailed → export). §17.
+[ ] T19: Unit tests for KPICard, FilterBar, DataTable; integration tests for /api/v1/* with mocked Supabase; aim ≥80% coverage on critical paths. §17.
+[ ] T20: Perf pass: code-split charts, memoize heavy components, verify Core Web Vitals budgets. §10.
+[ ] T21: Accessibility audit (keyboard, ARIA, contrast). §5.
+
+READY FOR DEPLOY CHECK
+[ ] T22: Verify acceptance criteria §18 & production checklist §19. Stop for approval.
+
+NOTES
+- Always keep stage mapping and naming consistent via STAGE_CODES (§3).
+- NULL quality → “Unknown”; division by zero → “—”. (§4)
+- Mock-first: do not remove mock-data until I approve API integration. (§1, §9)

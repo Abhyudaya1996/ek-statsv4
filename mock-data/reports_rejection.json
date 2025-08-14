@@ -1,0 +1,23 @@
+{
+  "success": true,
+  "data": {
+    "kpis": {
+      "totalRejections": 380,
+      "topReason": "KYC Failure",
+      "rejectionRate": 12.5,
+      "worstBank": "Axis"
+    },
+    "banks": [
+      { "bank": "Axis", "total": 800, "rejected": 200, "rate": 25.0 },
+      { "bank": "HDFC", "total": 1200, "rejected": 120, "rate": 10.0 },
+      { "bank": "ICICI", "total": 600, "rejected": 60, "rate": 10.0 }
+    ],
+    "reasons": [
+      { "category": "Documentation", "reason": "Invalid PAN", "count": 120 },
+      { "category": "KYC", "reason": "KYC Failure", "count": 180 },
+      { "category": "Credit", "reason": "Low Score", "count": 80 }
+    ]
+  },
+  "meta": { "version": "v1" }
+}
+

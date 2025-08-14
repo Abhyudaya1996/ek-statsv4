@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "data": [
+    { "applicationId": "APP123", "applicantName": "Rahul Sharma", "applicationDate": "12-07-2025", "bank": "HDFC", "cardName": "Millennia", "stageBucket": "KYC", "quality": "Good", "description": "KYC pending", "commission": 1500, "commissionStatus": "pending" },
+    { "applicationId": "APP124", "applicantName": "Asha Verma", "applicationDate": "05-07-2025", "bank": "Axis", "cardName": "ACE", "stageBucket": "Incomplete", "quality": "Unknown", "description": "Docs missing", "commission": 0, "commissionStatus": "pending" },
+    { "applicationId": "APP125", "applicantName": "Rohit Jain", "applicationDate": "03-07-2025", "bank": "HDFC", "cardName": "Regalia", "stageBucket": "Approved", "quality": "Good", "description": "Approved", "commission": 3000, "commissionStatus": "paid" }
+  ],
+  "meta": { "page": 1, "limit": 50, "total": 812, "version": "v1" }
+}

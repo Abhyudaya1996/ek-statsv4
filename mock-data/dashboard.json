@@ -1,0 +1,16 @@
+{
+  "kpis": {
+    "totalLeads": 1200,
+    "potentialCommission": 500000,
+    "approvalRate": 18.6,
+    "incomplete": 240
+  },
+  "commission": {
+    "total": 6000000,
+    "potential": 600000,
+    "pending": 2000000,
+    "paid": 3000000,
+    "requested": 400000,
+    "cancelled": 300000
+  }
+}

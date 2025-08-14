@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Accessibility: visible focus outlines */
+:focus-visible {
+  outline: 2px solid rgb(59 130 246);
+  outline-offset: 2px;
+}
+
+html, body, #__next {
+  height: 100%;
+}
+
+/* Fixed mobile nav support: keep content readable above the nav */
+:root {
+  --mobile-nav-height: 80px; /* matches h-20 in layout for bigger tap targets */
+}
+
+.with-bottom-nav-padding {
+  padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px));
+}
+
+/* Extra spacing within nav on small screens */
+.mobile-nav {
+  padding-top: 8px; /* 0.5rem */
+  padding-bottom: 16px; /* 1rem */
+}
+
+/* Mobile nav item helpers for consistent spacing/tap targets */
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  gap: 4px;
+}
+.mobile-nav-item:active {
+  background-color: rgba(0,0,0,0.04);
+  border-radius: 8px;
+}
+
+/* Scrollable bottom nav container to avoid overflow on narrow screens */
+.mobile-nav-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.mobile-nav-scroll > a {
+  flex: 0 0 auto;
+  min-width: 64px;
+}
+
+@media (max-width: 430px) {
+  .mobile-nav-item {
+    padding: 8px;
+    gap: 4px;
+  }
+  .mobile-nav-item span { font-size: 12px; }
+  .mobile-nav-item svg { width: 24px; height: 24px; }
+}
+
+/* Tooltip shown on hover/tap for icon-only mobile nav */
+.mobile-nav-item { position: relative; }
+.mobile-nav-item .tooltip {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 46px;
+  background: rgba(17, 24, 39, 0.9);
+  color: #fff;
+  padding: 4px 6px;
+  font-size: 11px;
+  border-radius: 6px;
+  white-space: nowrap;
+  visibility: hidden;
+  pointer-events: none;
+}
+.mobile-nav-item:hover .tooltip, .mobile-nav-item:focus .tooltip { visibility: visible; }
+
+@media (min-width: 1280px) {
+  .with-bottom-nav-padding {
+    padding-bottom: 0;
+  }
+}
+
+html, body {
+  overflow-x: hidden;
+}
+
+/* Subtle tap animation utility for touch targets */
+.tap-anim {
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.tap-anim:active {
+  transform: scale(0.97);
+}
+
+/* Donut chart helpers */
+.donut-chart-container {
+  position: relative;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.donut-chart-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.donut-chart-text {
+  text-anchor: middle;
+  dominant-baseline: middle;
+  font-size: 16px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .donut-chart-text {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 375px) {
+  .donut-chart-text {
+    font-size: 10px;
+  }
+}
+
+.donut-chart-segment {
+  cursor: pointer;
+  transition: opacity 0.3s ease-in-out;
+}
+.donut-chart-segment:active {
+  opacity: 0.8;
+}
+
+.donut-chart-tooltip {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  z-index: 10;
+  max-width: 260px;
+}
+
+/* Segment color classes for clarity and contrast */
+.donut-chart-segment.pending { fill: #F59E0B; }
+.donut-chart-segment.confirmed { fill: #10B981; }
+.donut-chart-segment.paid { fill: #3B82F6; }
+.donut-chart-segment.requested { fill: #9333EA; }
+.donut-chart-segment.cancelled { fill: #F87171; }
+
+/* Force hide any Recharts built-in legends/labels for the commission chart */
+.recharts-default-legend,
+.recharts-legend-wrapper,
+.recharts-legend-item,
+.recharts-pie-label-text,
+.recharts-pie-label-line {
+  display: none !important;
+}
+

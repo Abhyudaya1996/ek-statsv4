@@ -1,0 +1,21 @@
+{
+  "success": true,
+  "data": {
+    "clicks": 3200,
+    "leads": 800,
+    "stages": {
+      "incomplete": 200,
+      "kyc": 150,
+      "verification": 250,
+      "approved": 100,
+      "rejected": 100,
+      "expired": 50
+    },
+    "quality": [
+      { "label": "Good", "leads": 20, "cardoutRate": 70, "expectedCardout": 14, "earnings": 21000, "rejections": 6 },
+      { "label": "Avg", "leads": 50, "cardoutRate": 20, "expectedCardout": 10, "earnings": 15000, "rejections": 40 },
+      { "label": "Bad", "leads": 30, "cardoutRate": 0, "expectedCardout": 0, "earnings": 0, "rejections": 30 },
+      { "label": "Unknown", "leads": 12, "cardoutRate": 10, "expectedCardout": 1, "earnings": 1500, "rejections": 3 }
+    ]
+  }
+}

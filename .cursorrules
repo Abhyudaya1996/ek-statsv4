@@ -1,0 +1,39 @@
+# EK Stats Development Rules v4.1 (from PRD §14)
+Project: Mobile-first Next.js 14 + TypeScript + Tailwind + Supabase dashboard for EarnKaro influencers.
+Source of truth: docs/PRD_updated.md (v4.1). Follow cross-refs in §3, §4, §5, §6, §7, §8, §10, §11, §17, §18.
+
+CRITICAL BUSINESS RULES
+1) Potential Commission = 10% of total_commission (config via env). (§4, §6.1, §7.1)
+2) Dates: display DD-MM-YYYY; store/query by YYYY-MM for month filters. (§3)
+3) Currency: INR using Intl.NumberFormat('en-IN'). (§6)
+4) NULL quality = "Unknown". (§4)
+5) Division by zero = "—", not 0%. (§4)
+6) Stage codes must use STAGE_CODES constant. (§3)
+7) Mock-first → UI → Integration workflow. Do UI with mock-data before wiring APIs. (§1, §9)
+
+ACCESSIBILITY (WCAG AA) (§5)
+- 4.5:1 contrast min; show focus rings; keyboard navigable; ARIA labels on interactive UI; live regions for async updates.
+
+DEV WORKFLOW
+- Build components with ALL states (loading, empty, error, success).
+- Test at 320px, 768px, 1024px.
+- Use standardized ApiResponse { success, data?, error?, meta? }. (§7)
+- Keep files ≤200 LOC where possible; avoid inline styles; Tailwind only.
+
+API RULES (§7)
+- Versioned routes under /api/v1.
+- Validate requests with Zod; return proper HTTP codes.
+- Enforce RLS in Supabase; always filter by user_id.
+
+PERFORMANCE (§10)
+- React Query caches: dashboard 5m, detailed 1m.
+- Debounce search 300ms.
+- Lazy-load charts; virtualize lists >100 rows.
+- Respect DB indexes & materialized view from §3.
+
+DO NOT
+- Use `any` types.
+- Add console.log in production.
+- Skip loading/empty/error states.
+- Break stage naming; always import STAGE_CODES.
+- Execute installs/servers unless I explicitly ask.
