@@ -3,8 +3,10 @@ import React from 'react';
 import { FilterBar } from '@/components/filters/filter-bar';
 import { formatPercentageSafe, formatCurrencyINR } from '@/lib/utils';
 import { EmptyState } from '@/components/ui/empty-state';
+import { KPICard } from '@/components/ui/kpi-card';
 import { useFilters } from '@/hooks/use-filters';
 import { useFunnel } from '@/hooks/use-leads';
+import { BarChart3, TrendingUp, TrendingDown, Users, Target } from 'lucide-react';
 
 export default function FunnelPage() {
   const { filters } = useFilters();
@@ -12,15 +14,41 @@ export default function FunnelPage() {
 
   if (q.isLoading) {
     return (
-      <>
+      <div className="space-y-6">
         <FilterBar />
-        <div className="mt-3 h-64 animate-pulse rounded-lg bg-gray-200" aria-busy="true" />
-      </>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="skeleton h-6 w-48" />
+            <div className="skeleton h-4 w-96" />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="kpi-card">
+                <div className="skeleton h-4 w-24 mb-4" />
+                <div className="skeleton h-9 w-32" />
+              </div>
+            ))}
+          </div>
+          <div className="card p-6">
+            <div className="skeleton h-6 w-48 mb-4" />
+            <div className="skeleton h-64" />
+          </div>
+        </div>
+      </div>
     );
   }
 
   if (q.isError || !q.data) {
-    return <EmptyState title="Unable to load funnel" message={(q.error as Error)?.message ?? 'Please try again.'} />;
+    return (
+      <div className="space-y-6">
+        <FilterBar />
+        <EmptyState 
+          title="Unable to load funnel data" 
+          message={(q.error as Error)?.message ?? 'Please try again.'} 
+          showRetry
+        />
+      </div>
+    );
   }
 
   const { clicks, leads, stages, quality } = q.data as any;
@@ -28,13 +56,30 @@ export default function FunnelPage() {
   const approvalRate = Number(formatPercentageSafe(stages.approved, leads).replace('%', '')) || 0;
   const rejectionRate = Number(formatPercentageSafe(stages.rejected, leads).replace('%', '')) || 0;
 
-  const bar = (label: string, value: number, pct: string, color: string, height = 'h-8') => (
-    <div className="flex items-center">
-      <div className="w-24 text-xs text-gray-600">{label}</div>
-      <div className="flex-1">
-        <div className="w-full rounded bg-gray-100">
-          <div className={`${color} ${height} rounded tap-anim`} style={{ width: `${Math.max(5, Math.min(100, Number(pct.replace('%',''))))}%` }}>
-            <span className={`text-white text-[11px] px-2 leading-8 ${height === 'h-6' ? 'leading-6' : ''}`}>{value} {pct ? `(${pct})` : ''}</span>
+  const FunnelBar = ({ 
+    label, 
+    value, 
+    pct, 
+    color, 
+    isSubItem = false 
+  }: { 
+    label: string; 
+    value: number; 
+    pct: string; 
+    color: string; 
+    isSubItem?: boolean;
+  }) => (
+    <div className={`flex items-center ${isSubItem ? 'ml-8' : ''}`}>
+      <div className="w-32 text-sm font-medium text-gray-700">{label}</div>
+      <div className="flex-1 ml-4">
+        <div className="w-full rounded-full bg-gray-100 overflow-hidden">
+          <div 
+            className={`funnel-bar h-10 rounded-full flex items-center px-4 text-white text-sm font-medium ${color}`}
+            style={{ width: `${Math.max(5, Math.min(100, Number(pct.replace('%',''))))}%` }}
+          >
+            <span className="whitespace-nowrap">
+              {value.toLocaleString()} {pct && `(${pct})`}
+            </span>
           </div>
         </div>
       </div>
@@ -42,70 +87,219 @@ export default function FunnelPage() {
   );
 
   return (
-    <>
+    <div className="space-y-6">
       <FilterBar />
 
-      <h1 className="mt-2 text-lg font-bold text-gray-900 md:text-xl">Lead Funnel Report</h1>
-      <p className="mt-1 text-sm leading-5 text-gray-600">
-        Gain insight into your lead conversion funnel. Track progression from clicks to approvals and identify bottlenecks.
-      </p>
+      {/* Page Header */}
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">Lead Funnel Report</h1>
+        <p className="text-gray-600 leading-relaxed">
+          Gain insight into your lead conversion funnel. Track progression from clicks to approvals and identify bottlenecks.
+        </p>
+      </div>
 
       {/* Top KPIs */}
-      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-        <div className="rounded-lg border border-gray-200 bg-white p-3"><p className="text-xs text-gray-500">Total Clicks</p><p className="text-xl font-bold">{clicks}</p></div>
-        <div className="rounded-lg border border-gray-200 bg-white p-3"><p className="text-xs text-gray-500">Total Leads</p><p className="text-xl font-bold">{leads}</p></div>
-        <div className="rounded-lg border border-gray-200 bg-white p-3"><p className="text-xs text-gray-500">Approval Rate</p><p className="text-xl font-bold">{formatPercentageSafe(stages.approved, leads)}</p></div>
-        <div className="rounded-lg border border-gray-200 bg-white p-3"><p className="text-xs text-gray-500">Rejection Rate</p><p className="text-xl font-bold">{formatPercentageSafe(stages.rejected, leads)}</p></div>
-      </div>
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <KPICard
+          icon={<Users className="w-5 h-5" />}
+          title="Total Clicks"
+          value={clicks}
+          format="number"
+          tooltip="Total number of clicks that generated leads"
+        />
+        <KPICard
+          icon={<Target className="w-5 h-5" />}
+          title="Total Leads"
+          value={leads}
+          format="number"
+          tooltip="Total number of leads generated from clicks"
+        />
+        <KPICard
+          icon={<TrendingUp className="w-5 h-5" />}
+          title="Approval Rate"
+          value={approvalRate}
+          format="percentage"
+          tooltip="Percentage of leads that have been approved"
+        />
+        <KPICard
+          icon={<TrendingDown className="w-5 h-5" />}
+          title="Rejection Rate"
+          value={rejectionRate}
+          format="percentage"
+          tooltip="Percentage of leads that have been rejected"
+        />
+      </section>
 
-      {/* Scrollable vertical funnel for mobile */}
-      <div className="rounded-xl bg-white p-4 shadow-sm">
-        <h2 className="mb-4 text-base font-semibold">Lead Conversion Funnel</h2>
-        <div className="max-h-[360px] overflow-y-auto pr-1 space-y-3">
-          {bar('Clicks', clicks, '100%', 'bg-blue-500')}
-          {bar('Leads', leads, formatPercentageSafe(leads, clicks), 'bg-green-500')}
-          <div className="pl-6 space-y-2">
-            {bar('├ Incomplete', stages.incomplete, formatPercentageSafe(stages.incomplete, leads), 'bg-gray-400', 'h-6')}
-            {bar('├ KYC', stages.kyc, formatPercentageSafe(stages.kyc, leads), 'bg-yellow-500', 'h-6')}
-            {bar('├ Verification', stages.verification, formatPercentageSafe(stages.verification, leads), 'bg-indigo-500', 'h-6')}
-            {bar('├ Cardouts', stages.approved, formatPercentageSafe(stages.approved, leads), 'bg-emerald-600', 'h-6')}
-            {bar('├ Rejected', stages.rejected, formatPercentageSafe(stages.rejected, leads), 'bg-red-500', 'h-6')}
-            {bar('└ Expired', stages.expired, formatPercentageSafe(stages.expired, leads), 'bg-gray-500', 'h-6')}
+      {/* Funnel Visualization */}
+      <section className="card p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-100 text-blue-600">
+            <BarChart3 className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Lead Conversion Funnel</h2>
+            <p className="text-sm text-gray-600">Visual representation of lead progression through stages</p>
           </div>
         </div>
-      </div>
+        
+        <div className="funnel-container">
+          <div className="space-y-4">
+            <FunnelBar 
+              label="Clicks" 
+              value={clicks} 
+              pct="100%" 
+              color="bg-blue-500 hover:bg-blue-600" 
+            />
+            <FunnelBar 
+              label="Leads" 
+              value={leads} 
+              pct={formatPercentageSafe(leads, clicks)} 
+              color="bg-emerald-500 hover:bg-emerald-600" 
+            />
+            <FunnelBar 
+              label="├ Incomplete" 
+              value={stages.incomplete} 
+              pct={formatPercentageSafe(stages.incomplete, leads)} 
+              color="bg-gray-400 hover:bg-gray-500" 
+              isSubItem 
+            />
+            <FunnelBar 
+              label="├ KYC" 
+              value={stages.kyc} 
+              pct={formatPercentageSafe(stages.kyc, leads)} 
+              color="bg-amber-500 hover:bg-amber-600" 
+              isSubItem 
+            />
+            <FunnelBar 
+              label="├ Verification" 
+              value={stages.verification} 
+              pct={formatPercentageSafe(stages.verification, leads)} 
+              color="bg-purple-500 hover:bg-purple-600" 
+              isSubItem 
+            />
+            <FunnelBar 
+              label="├ Cardouts" 
+              value={stages.approved} 
+              pct={formatPercentageSafe(stages.approved, leads)} 
+              color="bg-emerald-600 hover:bg-emerald-700" 
+              isSubItem 
+            />
+            <FunnelBar 
+              label="├ Rejected" 
+              value={stages.rejected} 
+              pct={formatPercentageSafe(stages.rejected, leads)} 
+              color="bg-red-500 hover:bg-red-600" 
+              isSubItem 
+            />
+            <FunnelBar 
+              label="└ Expired" 
+              value={stages.expired} 
+              pct={formatPercentageSafe(stages.expired, leads)} 
+              color="bg-gray-500 hover:bg-gray-600" 
+              isSubItem 
+            />
+          </div>
+        </div>
+      </section>
 
       {/* Quality Analysis */}
-      <h2 className="mt-6 mb-2 text-base font-semibold text-gray-900">Quality Analysis</h2>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {(quality ?? []).map((row: any, idx: number) => {
-          const border = row.label === 'Good' ? 'border-green-500' : row.label === 'Avg' ? 'border-amber-500' : row.label === 'Bad' ? 'border-red-500' : 'border-gray-300';
-          return (
-            <div key={idx} className={`rounded-xl border-2 bg-white p-4 ${border}`}>
-              <div className="mb-2 flex items-center justify-between">
-                <span className={`rounded px-2 py-1 text-xs font-semibold ${row.label === 'Good' ? 'bg-green-100 text-green-800' : row.label === 'Avg' ? 'bg-amber-100 text-amber-800' : row.label === 'Bad' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>{row.label ?? 'Unknown'}</span>
-                <span className="text-sm font-medium">{row.leads ?? 0} leads</span>
-              </div>
-              <div className="space-y-2">
-                <div>
-                  <p className="text-xs text-gray-500">Cardout Rate</p>
-                  <p className="text-xl font-bold">{row.cardoutRate != null ? `${Number(row.cardoutRate).toFixed(1)}%` : '—'}</p>
-                </div>
-                <div className="flex justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Earnings</p>
-                    <p className="text-sm font-semibold">{formatCurrencyINR(row.earnings ?? 0)}</p>
+      <section>
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Quality Analysis</h2>
+          <p className="text-sm text-gray-600">Performance breakdown by lead quality categories</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {(quality ?? []).map((row: any, idx: number) => {
+            const getQualityStyles = (label: string) => {
+              switch (label) {
+                case 'Good':
+                  return {
+                    border: 'border-emerald-200',
+                    bg: 'bg-emerald-50',
+                    badge: 'quality-badge good',
+                    icon: '✓'
+                  };
+                case 'Avg':
+                  return {
+                    border: 'border-amber-200',
+                    bg: 'bg-amber-50',
+                    badge: 'quality-badge avg',
+                    icon: '⚠'
+                  };
+                case 'Bad':
+                  return {
+                    border: 'border-red-200',
+                    bg: 'bg-red-50',
+                    badge: 'quality-badge bad',
+                    icon: '✗'
+                  };
+                default:
+                  return {
+                    border: 'border-gray-200',
+                    bg: 'bg-gray-50',
+                    badge: 'quality-badge unknown',
+                    icon: '?'
+                  };
+              }
+            };
+
+            const styles = getQualityStyles(row.label);
+
+            return (
+              <div key={idx} className={`card ${styles.border} ${styles.bg} p-6 fade-in`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{styles.icon}</span>
+                    <span className={styles.badge}>{row.label ?? 'Unknown'}</span>
                   </div>
+                  <span className="text-sm font-semibold text-gray-700">{row.leads ?? 0} leads</span>
+                </div>
+                
+                <div className="space-y-4">
                   <div>
-                    <p className="text-xs text-gray-500">Rejections</p>
-                    <p className="text-sm">{row.rejections ?? 0}</p>
+                    <p className="text-xs font-medium text-gray-600 mb-1">Cardout Rate</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {row.cardoutRate != null ? `${Number(row.cardoutRate).toFixed(1)}%` : '—'}
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs font-medium text-gray-600 mb-1">Earnings</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {formatCurrencyINR(row.earnings ?? 0)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-gray-600 mb-1">Rejections</p>
+                      <p className="text-sm font-semibold text-gray-900">{row.rejections ?? 0}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Progress bar for cardout rate */}
+                  <div>
+                    <div className="flex justify-between text-xs text-gray-600 mb-1">
+                      <span>Performance</span>
+                      <span>{row.cardoutRate != null ? `${Number(row.cardoutRate).toFixed(1)}%` : '0%'}</span>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full transition-all duration-500 ${
+                          row.label === 'Good' ? 'bg-emerald-500' : 
+                          row.label === 'Avg' ? 'bg-amber-500' : 
+                          row.label === 'Bad' ? 'bg-red-500' : 'bg-gray-400'
+                        }`}
+                        style={{ width: `${Math.min(100, Math.max(0, row.cardoutRate ?? 0))}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
-    </>
+            );
+          })}
+        </div>
+      </section>
+    </div>
   );
 }

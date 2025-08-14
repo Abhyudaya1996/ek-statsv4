@@ -2,161 +2,363 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CSS Variables for consistent theming */
+:root {
+  --primary-50: #f0fdf4;
+  --primary-100: #dcfce7;
+  --primary-500: #22c55e;
+  --primary-600: #16a34a;
+  --primary-700: #15803d;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --border-radius: 12px;
+  --border-radius-lg: 16px;
+  --mobile-nav-height: 80px;
+}
+
 /* Accessibility: visible focus outlines */
 :focus-visible {
-  outline: 2px solid rgb(59 130 246);
+  outline: 2px solid var(--primary-500);
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
 html, body, #__next {
   height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Fixed mobile nav support: keep content readable above the nav */
-:root {
-  --mobile-nav-height: 80px; /* matches h-20 in layout for bigger tap targets */
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Enhanced button styles */
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+}
+
+.btn-primary {
+  @apply bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 hover:border-emerald-700 focus-visible:ring-emerald-500 shadow-sm hover:shadow-md;
+}
+
+.btn-secondary {
+  @apply bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 focus-visible:ring-gray-500 shadow-sm hover:shadow-md;
+}
+
+.btn-ghost {
+  @apply bg-transparent text-gray-600 border-transparent hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-gray-500;
+}
+
+/* Enhanced input styles */
+.input {
+  @apply w-full px-4 py-3 text-sm border border-gray-300 rounded-xl bg-white placeholder-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 hover:border-gray-400;
+}
+
+.input:disabled {
+  @apply bg-gray-50 text-gray-500 cursor-not-allowed;
+}
+
+/* Enhanced card styles */
+.card {
+  @apply bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200;
+}
+
+.card-interactive {
+  @apply cursor-pointer hover:border-gray-300 hover:-translate-y-0.5;
+}
+
+/* KPI Card enhancements */
+.kpi-card {
+  @apply card p-6 relative overflow-hidden;
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+}
+
+.kpi-value {
+  @apply text-3xl font-bold text-gray-900 leading-none;
+}
+
+.kpi-label {
+  @apply text-sm font-medium text-gray-600 mb-2;
+}
+
+.kpi-trend {
+  @apply flex items-center text-xs font-medium mt-2;
+}
+
+.kpi-trend.positive {
+  @apply text-emerald-600;
+}
+
+.kpi-trend.negative {
+  @apply text-red-600;
+}
+
+.kpi-trend.neutral {
+  @apply text-gray-500;
+}
+
+/* Dropdown enhancements */
+.dropdown {
+  @apply relative;
+}
+
+.dropdown-trigger {
+  @apply btn btn-secondary justify-between min-w-[140px] text-left;
+}
+
+.dropdown-content {
+  @apply absolute z-50 mt-2 w-full min-w-[200px] max-h-64 overflow-auto bg-white border border-gray-200 rounded-xl shadow-lg;
+}
+
+.dropdown-item {
+  @apply flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors duration-150;
+}
+
+.dropdown-item:first-child {
+  @apply rounded-t-xl;
+}
+
+.dropdown-item:last-child {
+  @apply rounded-b-xl;
+}
+
+.dropdown-item.selected {
+  @apply bg-emerald-50 text-emerald-700 font-medium;
+}
+
+/* Filter bar enhancements */
+.filter-bar {
+  @apply sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-200 p-4 shadow-sm;
+}
+
+.filter-section {
+  @apply space-y-4;
+}
+
+.filter-row {
+  @apply flex flex-wrap items-center gap-3;
+}
+
+.filter-label {
+  @apply text-sm font-medium text-gray-700 min-w-[60px];
+}
+
+/* Quality badges */
+.quality-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
+}
+
+.quality-badge.good {
+  @apply bg-emerald-100 text-emerald-800;
+}
+
+.quality-badge.avg {
+  @apply bg-amber-100 text-amber-800;
+}
+
+.quality-badge.bad {
+  @apply bg-red-100 text-red-800;
+}
+
+.quality-badge.unknown {
+  @apply bg-gray-100 text-gray-800;
+}
+
+/* Stage badges */
+.stage-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
+}
+
+.stage-badge.incomplete {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.stage-badge.kyc {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.stage-badge.verification {
+  @apply bg-purple-100 text-purple-800;
+}
+
+.stage-badge.approved {
+  @apply bg-emerald-100 text-emerald-800;
+}
+
+.stage-badge.rejected {
+  @apply bg-red-100 text-red-800;
+}
+
+/* Loading states */
+.skeleton {
+  @apply animate-pulse bg-gray-200 rounded;
+}
+
+.loading-spinner {
+  @apply inline-block w-4 h-4 border-2 border-gray-300 border-t-emerald-600 rounded-full animate-spin;
+}
+
+/* Tooltip styles */
+.tooltip {
+  @apply absolute z-50 px-3 py-2 text-xs font-medium text-white bg-gray-900 rounded-lg shadow-lg pointer-events-none;
+}
+
+.tooltip::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -4px;
+  border: 4px solid transparent;
+  border-top-color: #111827;
 }
 
 .with-bottom-nav-padding {
   padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px));
 }
 
-/* Extra spacing within nav on small screens */
+/* Mobile navigation enhancements */
 .mobile-nav {
-  padding-top: 8px; /* 0.5rem */
-  padding-bottom: 16px; /* 1rem */
+  @apply bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-lg;
+  padding-top: 8px;
+  padding-bottom: 16px;
 }
 
-/* Mobile nav item helpers for consistent spacing/tap targets */
 .mobile-nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 8px;
-  gap: 4px;
-}
-.mobile-nav-item:active {
-  background-color: rgba(0,0,0,0.04);
-  border-radius: 8px;
+  @apply flex flex-col items-center justify-center p-2 gap-1 rounded-xl transition-all duration-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500;
 }
 
-/* Scrollable bottom nav container to avoid overflow on narrow screens */
+.mobile-nav-item:active {
+  @apply bg-gray-100 scale-95;
+}
+
 .mobile-nav-scroll {
-  overflow-x: auto;
+  @apply overflow-x-auto;
   -webkit-overflow-scrolling: touch;
 }
+
 .mobile-nav-scroll > a {
-  flex: 0 0 auto;
-  min-width: 64px;
+  @apply flex-shrink-0 min-w-[64px];
 }
 
 @media (max-width: 430px) {
   .mobile-nav-item {
-    padding: 8px;
-    gap: 4px;
+    @apply p-2 gap-1;
   }
-  .mobile-nav-item span { font-size: 12px; }
-  .mobile-nav-item svg { width: 24px; height: 24px; }
+  .mobile-nav-item span { 
+    @apply text-xs;
+  }
+  .mobile-nav-item svg { 
+    @apply w-6 h-6;
+  }
 }
 
-/* Tooltip shown on hover/tap for icon-only mobile nav */
-.mobile-nav-item { position: relative; }
-.mobile-nav-item .tooltip {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 46px;
-  background: rgba(17, 24, 39, 0.9);
-  color: #fff;
-  padding: 4px 6px;
-  font-size: 11px;
-  border-radius: 6px;
-  white-space: nowrap;
-  visibility: hidden;
-  pointer-events: none;
+.mobile-nav-item { 
+  @apply relative;
 }
-.mobile-nav-item:hover .tooltip, .mobile-nav-item:focus .tooltip { visibility: visible; }
+
+.mobile-nav-item .tooltip {
+  @apply absolute left-1/2 transform -translate-x-1/2 bottom-12 bg-gray-900 text-white px-2 py-1 text-xs rounded-md whitespace-nowrap invisible pointer-events-none;
+}
+
+.mobile-nav-item:hover .tooltip, 
+.mobile-nav-item:focus .tooltip { 
+  @apply visible;
+}
 
 @media (min-width: 1280px) {
   .with-bottom-nav-padding {
-    padding-bottom: 0;
+    @apply pb-0;
   }
 }
 
-html, body {
-  overflow-x: hidden;
-}
-
-/* Subtle tap animation utility for touch targets */
+/* Enhanced tap animations */
 .tap-anim {
-  transition: transform 150ms ease, box-shadow 150ms ease;
-}
-.tap-anim:active {
-  transform: scale(0.97);
+  @apply transition-all duration-150 ease-out;
 }
 
-/* Donut chart helpers */
+.tap-anim:active {
+  @apply scale-95;
+}
+
+/* Chart enhancements */
 .donut-chart-container {
-  position: relative;
-  padding: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  @apply relative p-4 flex justify-center items-center;
 }
 
 .donut-chart-container svg {
-  max-width: 100%;
-  height: auto;
+  @apply max-w-full h-auto;
 }
 
 .donut-chart-text {
+  @apply text-base font-bold pointer-events-none;
   text-anchor: middle;
   dominant-baseline: middle;
-  font-size: 16px;
-  font-weight: 700;
-  pointer-events: none;
 }
 
 @media (max-width: 640px) {
   .donut-chart-text {
-    font-size: 12px;
+    @apply text-sm;
   }
 }
 
 @media (max-width: 375px) {
   .donut-chart-text {
-    font-size: 10px;
+    @apply text-xs;
   }
 }
 
 .donut-chart-segment {
-  cursor: pointer;
-  transition: opacity 0.3s ease-in-out;
+  @apply cursor-pointer transition-opacity duration-300 ease-in-out;
 }
+
 .donut-chart-segment:active {
-  opacity: 0.8;
+  @apply opacity-80;
 }
 
 .donut-chart-tooltip {
-  position: absolute;
-  background-color: rgba(0, 0, 0, 0.85);
-  color: #fff;
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 14px;
-  z-index: 10;
-  max-width: 260px;
+  @apply absolute bg-gray-900 bg-opacity-90 text-white p-3 rounded-lg text-sm z-10 max-w-xs;
 }
 
-/* Segment color classes for clarity and contrast */
-.donut-chart-segment.pending { fill: #F59E0B; }
-.donut-chart-segment.confirmed { fill: #10B981; }
-.donut-chart-segment.paid { fill: #3B82F6; }
-.donut-chart-segment.requested { fill: #9333EA; }
-.donut-chart-segment.cancelled { fill: #F87171; }
+/* Enhanced segment colors */
+.donut-chart-segment.pending { 
+  fill: #f59e0b; 
+}
+.donut-chart-segment.confirmed { 
+  fill: #10b981; 
+}
+.donut-chart-segment.paid { 
+  fill: #3b82f6; 
+}
+.donut-chart-segment.requested { 
+  fill: #8b5cf6; 
+}
+.donut-chart-segment.cancelled { 
+  fill: #ef4444; 
+}
 
-/* Force hide any Recharts built-in legends/labels for the commission chart */
+/* Hide Recharts default elements */
 .recharts-default-legend,
 .recharts-legend-wrapper,
 .recharts-legend-item,
@@ -165,3 +367,119 @@ html, body {
   display: none !important;
 }
 
+/* Funnel chart enhancements */
+.funnel-bar {
+  @apply transition-all duration-200 hover:opacity-80;
+  min-width: 5% !important;
+}
+
+.funnel-container {
+  @apply overflow-x-auto pb-2;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Error states */
+.error-state {
+  @apply text-center py-12;
+}
+
+.error-icon {
+  @apply w-12 h-12 mx-auto mb-4 text-gray-400;
+}
+
+.error-title {
+  @apply text-lg font-semibold text-gray-900 mb-2;
+}
+
+.error-message {
+  @apply text-sm text-gray-600 mb-4;
+}
+
+/* Empty states */
+.empty-state {
+  @apply text-center py-16;
+}
+
+.empty-icon {
+  @apply w-16 h-16 mx-auto mb-4 text-gray-300;
+}
+
+.empty-title {
+  @apply text-xl font-semibold text-gray-900 mb-2;
+}
+
+.empty-message {
+  @apply text-gray-600 mb-6;
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .kpi-value {
+    @apply text-2xl;
+  }
+  
+  .card {
+    @apply rounded-xl;
+  }
+  
+  .filter-bar {
+    @apply p-3;
+  }
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Focus management */
+.focus-trap {
+  @apply focus:outline-none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .card {
+    @apply border-2 border-gray-400;
+  }
+  
+  .btn-primary {
+    @apply border-2 border-emerald-800;
+  }
+  
+  .btn-secondary {
+    @apply border-2 border-gray-600;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .tap-anim,
+  .card-interactive,
+  .mobile-nav-item,
+  .donut-chart-segment {
+    @apply transition-none;
+  }
+  
+  .loading-spinner {
+    @apply animate-none;
+  }
+  
+  .skeleton {
+    @apply animate-none;
+  }
+}
