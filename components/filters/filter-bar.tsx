@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { useFilters } from '@/hooks/use-filters';
-import { Search, ChevronDown, X, Filter, Check } from 'lucide-react';
+import DateRangePickerModal, { type DateRange } from '@/components/ui/DateRangePicker';
 
 type FilterBarProps = {
   search?: string;
@@ -21,7 +21,9 @@ const STAGE_OPTIONS = ['Incomplete', 'KYC', 'Verification', 'Approved', 'Rejecte
 const QUALITY_OPTIONS = ['Good', 'Avg', 'Bad', 'Unknown'] as const;
 
 export function FilterBar(props: FilterBarProps) {
-  const { filters, setTimePreset, validationError } = useFilters();
+  const { filters, setTimePreset, setCustomRange, validationError } = useFilters();
+  const [showDateModal, setShowDateModal] = React.useState(false);
+  const [applicationMonth, setApplicationMonth] = React.useState<string>('');
   const {
     search,
     onSearchChange,
@@ -32,7 +34,7 @@ export function FilterBar(props: FilterBarProps) {
     onQualityChange,
     banks,
     onBanksChange,
-    availableBanks = ['HDFC', 'Axis', 'ICICI', 'SBI'],
+    availableBanks = ['HDFC', 'Axis'],
     onApply,
   } = props;
 
@@ -42,17 +44,9 @@ export function FilterBar(props: FilterBarProps) {
     options: string[];
     selected: string[];
     onChange: (values: string[]) => void;
-    icon?: React.ReactNode;
   };
 
-  const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ 
-    label, 
-    ariaLabel, 
-    options, 
-    selected, 
-    onChange,
-    icon 
-  }) => {
+  const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ label, ariaLabel, options, selected, onChange }) => {
     const [open, setOpen] = React.useState(false);
     const containerRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -78,71 +72,40 @@ export function FilterBar(props: FilterBarProps) {
       onChange(next);
     };
 
-    const clearAll = () => {
-      onChange([]);
-    };
-
     const summary = selected.length ? `${label} (${selected.length})` : label;
 
     return (
-      <div ref={containerRef} className="dropdown">
+      <div ref={containerRef} className="relative">
         <button
           type="button"
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-label={ariaLabel}
           onClick={() => setOpen(v => !v)}
-          className="dropdown-trigger"
+          className="rounded-lg border bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus-visible:ring-2"
         >
-          <div className="flex items-center gap-2">
-            {icon}
-            <span className="truncate">{summary}</span>
-          </div>
-          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+          {summary}
         </button>
-        
         {open && (
-          <div className="dropdown-content slide-up">
-            {selected.length > 0 && (
-              <div className="px-4 py-2 border-b border-gray-100">
-                <button
-                  onClick={clearAll}
-                  className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1"
-                >
-                  <X className="w-3 h-3" />
-                  Clear all
-                </button>
-              </div>
-            )}
-            <div className="max-h-48 overflow-y-auto">
+          <div
+            role="listbox"
+            aria-label={ariaLabel}
+            className="absolute left-0 z-20 mt-2 w-56 max-h-56 overflow-auto rounded-lg border bg-white p-2 shadow-lg"
+          >
+            <div className="flex flex-col gap-1">
               {options.map(opt => {
                 const id = `${label}-${opt}`;
                 const checked = selected.includes(opt);
                 return (
-                  <label 
-                    key={opt} 
-                    htmlFor={id} 
-                    className={`dropdown-item ${checked ? 'selected' : ''}`}
-                  >
-                    <div className="flex items-center gap-3 w-full">
-                      <div className="relative">
-                        <input
-                          id={id}
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => toggleValue(opt)}
-                          className="sr-only"
-                        />
-                        <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
-                          checked 
-                            ? 'bg-emerald-600 border-emerald-600' 
-                            : 'border-gray-300 hover:border-gray-400'
-                        }`}>
-                          {checked && <Check className="w-3 h-3 text-white" />}
-                        </div>
-                      </div>
-                      <span className="flex-1">{opt}</span>
-                    </div>
+                  <label key={opt} htmlFor={id} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-gray-50">
+                    <input
+                      id={id}
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleValue(opt)}
+                      className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span>{opt}</span>
                   </label>
                 );
               })}
@@ -154,56 +117,94 @@ export function FilterBar(props: FilterBarProps) {
   };
 
   return (
-    <section aria-label="Filters" className="filter-bar">
-      <div className="filter-section">
-        {/* Time Range Filters */}
-        <div className="filter-row">
-          <span className="filter-label">Time:</span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setTimePreset('current')}
-              className={`btn ${
-                filters.timeRange.preset === 'current_month' ? 'btn-primary' : 'btn-secondary'
-              }`}
-            >
-              Current
-            </button>
-            <button
-              type="button"
-              onClick={() => setTimePreset('last3')}
-              className={`btn ${
-                filters.timeRange.preset === 'last_3_months' ? 'btn-primary' : 'btn-secondary'
-              }`}
-            >
-              Last 3
-            </button>
-            <button
-              type="button"
-              onClick={() => setTimePreset('last6')}
-              className={`btn ${
-                filters.timeRange.preset === 'last_6_months' ? 'btn-primary' : 'btn-secondary'
-              }`}
-            >
-              Last 6
-            </button>
-          </div>
+    <>
+    <section aria-label="Filters" className="sticky top-0 z-10 w-full bg-white/80 p-3 backdrop-blur">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm font-medium">Time:</span>
+          <button
+            type="button"
+            onClick={() => setTimePreset('current')}
+            className={`rounded-md px-3 py-1 text-sm ring-1 ring-gray-300 focus:outline-none focus-visible:ring-2 ${
+              filters.timeRange.preset === 'current_month' ? 'bg-emerald-600 text-white' : 'bg-white'
+            }`}
+          >
+            Current
+          </button>
+          <button
+            type="button"
+            onClick={() => setTimePreset('last3')}
+            className={`rounded-md px-3 py-1 text-sm ring-1 ring-gray-300 focus:outline-none focus-visible:ring-2 ${
+              filters.timeRange.preset === 'last_3_months' ? 'bg-emerald-600 text-white' : 'bg-white'
+            }`}
+          >
+            Last 3
+          </button>
+          <button
+            type="button"
+            onClick={() => setTimePreset('last6')}
+            className={`rounded-md px-3 py-1 text-sm ring-1 ring-gray-300 focus:outline-none focus-visible:ring-2 ${
+              filters.timeRange.preset === 'last_6_months' ? 'bg-emerald-600 text-white' : 'bg-white'
+            }`}
+          >
+            Last 6
+          </button>
+
+          {/* Application Month dropdown */}
+          <select
+            aria-label="Application Month"
+            value={applicationMonth}
+            onChange={e => {
+              const m = e.target.value;
+              setApplicationMonth(m);
+              if (!m) return;
+              // Update month range to single month
+              // Expect YYYY-MM
+              // Keep preset as custom to indicate explicit selection
+              (setTimePreset as any)('noop');
+              // Update via custom setter exposed in provider
+              setCustomRange(m, m);
+            }}
+            className="rounded-md border px-3 py-1 text-sm"
+          >
+            <option value="">Application Month…</option>
+            {/* Basic recent list: current, last-5 months */}
+            {Array.from({ length: 6 }).map((_, i) => {
+              const d = new Date();
+              d.setMonth(d.getMonth() - i);
+              const month = String(d.getMonth() + 1).padStart(2, '0');
+              const val = `${d.getFullYear()}-${month}`;
+              return (
+                <option key={val} value={val}>{val}</option>
+              );
+            })}
+          </select>
+
+          {/* Custom date range */}
+          <button
+            type="button"
+            onClick={() => setShowDateModal(true)}
+            className="rounded-md px-3 py-1 text-sm ring-1 ring-gray-300 focus:outline-none focus-visible:ring-2 bg-white"
+          >
+            Custom Range…
+          </button>
+          {filters.timeRange.preset === 'custom' && (filters as any).customRange && (
+            <span className="text-xs text-gray-600">
+              {(filters as any).customRange.from} → {(filters as any).customRange.to}
+            </span>
+          )}
         </div>
 
-        {/* Search and Filter Controls */}
         {(onSearchChange || onStagesChange || onQualityChange || onBanksChange) && (
-          <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
             {onSearchChange && (
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-gray-400" />
-                </div>
+              <>
                 <input
                   aria-label="Search leads"
-                  placeholder="Search by ID, name, bank, card..."
+                  placeholder="Search by ID, name, bank, card"
                   value={search ?? ''}
                   onChange={e => onSearchChange(e.target.value)}
-                  className="input pl-11"
+                  className="w-64 rounded-lg border px-3 py-2 text-sm focus:outline-none focus-visible:ring-2"
                   list="lead-search-suggestions"
                 />
                 {searchSuggestions.length > 0 && (
@@ -213,65 +214,67 @@ export function FilterBar(props: FilterBarProps) {
                     ))}
                   </datalist>
                 )}
-              </div>
+              </>
             )}
 
-            <div className="filter-row">
-              {onStagesChange && (
-                <MultiSelectDropdown
-                  label="Stage"
-                  ariaLabel="Stage filter"
-                  options={[...STAGE_OPTIONS]}
-                  selected={stages ?? []}
-                  onChange={onStagesChange}
-                  icon={<Filter className="w-4 h-4" />}
-                />
-              )}
+            {onStagesChange && (
+              <MultiSelectDropdown
+                label="Stage"
+                ariaLabel="Stage filter"
+                options={[...STAGE_OPTIONS]}
+                selected={stages ?? []}
+                onChange={onStagesChange}
+              />
+            )}
 
-              {onQualityChange && (
-                <MultiSelectDropdown
-                  label="Quality"
-                  ariaLabel="Quality filter"
-                  options={[...QUALITY_OPTIONS]}
-                  selected={quality ?? []}
-                  onChange={onQualityChange}
-                />
-              )}
+            {onQualityChange && (
+              <MultiSelectDropdown
+                label="Quality"
+                ariaLabel="Quality filter"
+                options={[...QUALITY_OPTIONS]}
+                selected={quality ?? []}
+                onChange={onQualityChange}
+              />
+            )}
 
-              {onBanksChange && (
-                <MultiSelectDropdown
-                  label="Bank"
-                  ariaLabel="Bank filter"
-                  options={Array.from(new Set(availableBanks)).filter(Boolean)}
-                  selected={banks ?? []}
-                  onChange={onBanksChange}
-                />
-              )}
-            </div>
+            {onBanksChange && (
+              <MultiSelectDropdown
+                label="Bank"
+                ariaLabel="Bank filter"
+                options={Array.from(new Set(availableBanks)).filter(Boolean)}
+                selected={banks ?? []}
+                onChange={onBanksChange}
+              />
+            )}
           </div>
         )}
 
-        {/* Apply Button */}
         {onApply && (
           <div className="flex justify-start">
             <button
               aria-label="Apply Filters"
-              className="btn btn-primary"
+              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white focus:outline-none focus-visible:ring-2"
               onClick={onApply}
             >
-              <Filter className="w-4 h-4 mr-2" />
               Apply Filters
             </button>
           </div>
         )}
 
-        {/* Validation Error */}
-        {validationError && (
-          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3" role="alert" aria-live="assertive">
-            {validationError}
-          </div>
-        )}
+        <div className="text-xs text-red-600" role="alert" aria-live="assertive">
+          {validationError}
+        </div>
       </div>
     </section>
+    <DateRangePickerModal
+      isOpen={showDateModal}
+      onClose={() => setShowDateModal(false)}
+      onChange={(range: DateRange) => {
+        setCustomRange(range.from.slice(0,7), range.to.slice(0,7));
+        (filters as any).customRange = range as any;
+      }}
+    />
+    </>
   );
 }
+

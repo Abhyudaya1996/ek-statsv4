@@ -34,6 +34,17 @@ export async function GET(req: NextRequest) {
       .gte('application_month', filters.timeRange.start)
       .lte('application_month', filters.timeRange.end);
 
+    // If explicit application-month selection is provided, narrow to that single month
+    if ((filters as any).applicationMonth) {
+      query = query.eq('application_month', (filters as any).applicationMonth as string);
+    }
+
+    // If a custom day range is present, filter by application_date day granularity
+    if ((filters as any).customRange) {
+      const cr = (filters as any).customRange as { from: string; to: string };
+      query = query.gte('application_date', cr.from).lte('application_date', cr.to);
+    }
+
     if (filters.banks.length) query = query.in('bank', filters.banks);
     if (filters.cards.length) query = query.in('card_name', filters.cards);
     if (filters.qualityStages && (filters.qualityStages as string[]).length) {

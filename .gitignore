@@ -1,4 +1,4 @@
-# Dependencies
+﻿# Dependencies
 node_modules/
 
 # Next.js
@@ -23,4 +23,9 @@ Thumbs.db
 
 # Coverage
 coverage/
-.env
+
+ek-statsv4/
+
+ek-statsv4-check/
+
+tsconfig.tsbuildinfo

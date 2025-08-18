@@ -91,3 +91,9 @@ export function useTimeline(view: 'month' | 'day', month: string, filters: Filte
   });
 }
 
+// Optional: stats hook that respects application-month vs custom range if needed elsewhere
+export function useLeadStats(filters: FilterOptions) {
+  // Reuse existing funnel/approval APIs depending on displayed stats; keeping a placeholder for future split.
+  return useFunnel(filters);
+}
+

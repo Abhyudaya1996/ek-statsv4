@@ -9,6 +9,7 @@ type FilterContextValue = {
   filters: FilterOptions;
   setTimePreset: (preset: TimePreset) => void;
   setCustomRange: (start: string, end: string) => void;
+  setCustomDayRange: (from: string, to: string) => void;
   setBanks: (banks: string[]) => void;
   setCards: (cards: string[]) => void;
   setQuality: (q: string[]) => void;
@@ -25,6 +26,7 @@ const defaultFilters: FilterOptions = {
   users: [],
   stages: [],
   applicationQuality: [],
+  qualityStages: [],
   search: '',
 };
 
@@ -60,6 +62,17 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
     setFilters(f => ({ ...f, timeRange: { start, end, preset: 'custom' } }));
   };
 
+  const setCustomDayRange = (from: string, to: string) => {
+    const schema = (FiltersSchema.shape as any).customRange;
+    const parsed = schema?.safeParse?.({ from, to });
+    if (parsed && !parsed.success) {
+      setValidationError('Invalid date format. Use YYYY-MM-DD.');
+      return;
+    }
+    setValidationError(undefined);
+    setFilters(f => ({ ...f, timeRange: { start: from.slice(0,7), end: to.slice(0,7), preset: 'custom' }, customRange: { from, to } as any }));
+  };
+
   const setBanks = (banks: string[]) => setFilters(f => ({ ...f, banks }));
   const setCards = (cards: string[]) => setFilters(f => ({ ...f, cards }));
   const setQuality = (applicationQuality: string[]) => setFilters(f => ({ ...f, applicationQuality }));
@@ -69,6 +82,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
     filters,
     setTimePreset,
     setCustomRange,
+    setCustomDayRange,
     setBanks,
     setCards,
     setQuality,

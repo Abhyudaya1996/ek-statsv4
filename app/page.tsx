@@ -1,12 +1,12 @@
 "use client";
 import React from 'react';
 import { CommissionChart } from '@/components/charts/commission-chart';
+import { CommissionKpiCards } from '@/components/dashboard/CommissionKpiCards';
 import { FilterBar } from '@/components/filters/filter-bar';
 import { EmptyState } from '@/components/ui/empty-state';
-import { KPICard } from '@/components/ui/kpi-card';
 import { useFilters } from '@/hooks/use-filters';
 import { useDashboardKpis, useCommission } from '@/hooks/use-leads';
-import { Users, IndianRupee, TrendingUp, AlertTriangle, CheckCircle, Activity } from 'lucide-react';
+import { Users, IndianRupee, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
 
 export default function Page() {
   const { filters } = useFilters();
@@ -18,137 +18,84 @@ export default function Page() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <>
         <FilterBar />
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="skeleton h-6 w-48" />
-            <div className="skeleton h-4 w-96" />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" aria-busy="true">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="kpi-card">
-                <div className="skeleton h-4 w-24 mb-4" />
-                <div className="skeleton h-9 w-32" />
-              </div>
-            ))}
-          </div>
-          <div className="card p-6">
-            <div className="skeleton h-6 w-48 mb-4" />
-            <div className="skeleton h-[300px] md:h-[400px]" />
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" aria-busy="true">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-200" />
+          ))}
         </div>
-      </div>
+        <div className="mt-6 h-[300px] md:h-[400px] animate-pulse rounded-xl bg-gray-200" />
+      </>
     );
   }
 
   if (isError || !kpisQ.data || !commissionQ.data) {
-    return (
-      <div className="space-y-6">
-        <FilterBar />
-        <EmptyState 
-          title="Unable to load dashboard data" 
-          message={(kpisQ.error || commissionQ.error)?.message ?? 'Please try again later.'} 
-          showRetry
-        />
-      </div>
-    );
+    return <EmptyState title="Unable to load data" message={(kpisQ.error || commissionQ.error)?.message ?? 'Please try again later.'} />;
   }
 
   const k = (kpisQ.data as any) ?? {};
   const c = (commissionQ.data as any) ?? {};
 
+  const KPI = ({ bg, Icon, title, value, trend, emphasis = false }: { bg: string; Icon: any; title: string; value: string; trend?: string; emphasis?: boolean }) => (
+    <div className={`flex items-center space-x-4 rounded-xl border border-gray-200 ${emphasis ? 'bg-emerald-50' : 'bg-white'} p-4 shadow-sm tap-anim`}>
+      <div className="flex-shrink-0">
+        <div className={`flex h-8 w-8 items-center justify-center rounded-full ${bg}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] text-gray-500">{title}</p>
+        <p className={`truncate ${emphasis ? 'text-3xl' : 'text-2xl'} font-bold text-gray-900`}>{value}</p>
+        {trend && (
+          <p className="flex items-center text-xs text-green-600">
+            <TrendingUp className="mr-1 h-4 w-4" /> {trend}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="space-y-6">
+    <>
       <FilterBar />
 
-      {/* Page Header */}
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">EK Stats Dashboard</h1>
-        <p className="text-gray-600 leading-relaxed">
-          Lead Management & Analytics Platform. Unlock the power of smart analytics to drive better lead
-          performance and make informed, data‑driven decisions.
-        </p>
+      <h1 className="mt-2 text-lg font-bold text-gray-900 md:text-xl">EK Stats Dashboard</h1>
+      <p className="mt-1 text-sm leading-5 text-gray-600">
+        <strong>Unlock Powerful Lead Analytics & Commission Insights</strong> — Effortlessly track lead performance, monitor commission earnings, and act on real-time insights.
+      </p>
+
+      {/* KPI Grid - upgraded commission metrics */}
+      <div className="mt-3">
+        <CommissionKpiCards />
       </div>
 
-      {/* KPI Grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard 
-          emphasis 
-          icon={<Users className="w-5 h-5" />}
-          title="Total Leads" 
-          value={k.totalLeads ?? 0} 
-          format="number"
-          tooltip="Total number of leads in the selected time period"
-          trend={{ direction: 'up', percentage: 12.5, period: 'vs last month' }}
-        />
-        <KPICard 
-          emphasis 
-          icon={<IndianRupee className="w-5 h-5" />}
-          title="Potential Commission" 
-          value={k.potentialCommission ?? 0} 
-          format="currency"
-          tooltip="Estimated commission based on current lead performance"
-          trend={{ direction: 'up', percentage: 8.3, period: 'vs last month' }}
-        />
-        <KPICard 
-          icon={<TrendingUp className="w-5 h-5" />}
-          title="Approval Rate" 
-          value={k.approvalRate ?? 0} 
-          format="percentage"
-          tooltip="Percentage of leads that have been approved"
-          trend={{ direction: 'down', percentage: 2.1, period: 'vs last month' }}
-        />
-        <KPICard 
-          icon={<AlertTriangle className="w-5 h-5" />}
-          title="Incomplete" 
-          value={k.incomplete ?? 0} 
-          format="number"
-          tooltip="Number of leads with incomplete applications"
-          trend={{ direction: 'neutral', percentage: 0.5, period: 'vs last month' }}
-        />
-      </section>
-
       {/* Commission Breakdown */}
-      <section>
+      <section className="mt-6">
         <CommissionChart data={c} title="Commission Breakdown" />
       </section>
 
-      {/* Recent Activity */}
-      <section className="card p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-100 text-blue-600">
-            <Activity className="w-5 h-5" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
-            <p className="text-sm text-gray-600">Latest updates on your leads</p>
-          </div>
-        </div>
-        <div className="space-y-4">
-          {[
-            { id: 4503, bank: 'HDFC Bank', card: 'Regalia', amount: 1300, time: '10 mins ago' },
-            { id: 4502, bank: 'Axis Bank', card: 'Magnus', amount: 1200, time: '25 mins ago' },
-            { id: 4501, bank: 'ICICI Bank', card: 'Sapphiro', amount: 1100, time: '1 hour ago' }
-          ].map(item => (
-            <div key={item.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100">
-                  <CheckCircle className="h-5 w-5 text-emerald-600" />
-                </div>
+      {/* Recent Activity (static sample) */}
+      <section className="mt-6 rounded-xl bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-lg font-semibold">Recent Activity</h2>
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="flex items-center justify-between py-2">
+              <div className="flex items-center space-x-3">
+                <CheckCircle className="h-5 w-5 text-green-500" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Lead #{item.id} Approved</p>
-                  <p className="text-xs text-gray-500">{item.bank} - {item.card}</p>
+                  <p className="text-sm font-medium">Lead #{4500 + i} Approved</p>
+                  <p className="text-xs text-gray-500">HDFC Bank - Regalia</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-semibold text-emerald-600">+₹{item.amount.toLocaleString('en-IN')}</p>
-                <p className="text-xs text-gray-500">{item.time}</p>
+                <p className="text-sm font-semibold text-green-600">+₹{(1000 + i * 100).toLocaleString('en-IN')}</p>
+                <p className="text-xs text-gray-500">10 mins ago</p>
               </div>
             </div>
           ))}
         </div>
       </section>
-    </div>
+    </>
   );
 }

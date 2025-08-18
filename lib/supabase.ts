@@ -12,7 +12,7 @@ function hasEnv() {
 }
 
 function createStub(): SupabaseClient {
-  const handler: ProxyHandler<any> = {
+  const handler: ProxyHandler<Record<string, unknown>> = {
     get() {
       throw new SupabaseEnvError();
     },
@@ -20,8 +20,7 @@ function createStub(): SupabaseClient {
       throw new SupabaseEnvError();
     },
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return new Proxy({} as any, handler) as unknown as SupabaseClient;
+  return new Proxy({}, handler) as unknown as SupabaseClient;
 }
 
 export function getBrowserClient(): SupabaseClient {

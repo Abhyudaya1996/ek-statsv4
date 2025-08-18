@@ -37,7 +37,9 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "ek-statsv4",
+    "ek-statsv4-check"
   ]
 }
 

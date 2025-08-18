@@ -31,11 +31,19 @@ export async function GET(req: NextRequest) {
     const monthEnd = filters.timeRange.end;
 
     // Example query sketch; replace with real columns and filters
-    const { data: rows, error } = await supabase
+    let query = supabase
       .from('Raw')
-      .select('application_id, stage_code, total_commission, ops_status')
+      .select('application_id, stage_code, total_commission, ops_status, application_date, application_month')
       .gte('application_month', monthStart)
       .lte('application_month', monthEnd);
+    if ((filters as any).applicationMonth) {
+      query = query.eq('application_month', (filters as any).applicationMonth as string);
+    }
+    if ((filters as any).customRange) {
+      const cr = (filters as any).customRange as { from: string; to: string };
+      query = query.gte('application_date', cr.from).lte('application_date', cr.to);
+    }
+    const { data: rows, error } = await query;
 
     if (error) return fail(500, 'Failed to fetch');
 
