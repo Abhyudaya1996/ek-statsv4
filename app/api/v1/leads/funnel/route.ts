@@ -24,11 +24,21 @@ export async function GET(req: NextRequest) {
 
     const supabase = getServerClient();
 
-    const { data: rawRows, error } = await supabase
+    let query = supabase
       .from('Raw')
-      .select('application_id, stage_code, clean_exit, application_month')
+      .select('application_id, stage_code, clean_exit, application_month, application_date')
       .gte('application_month', filters.timeRange.start)
       .lte('application_month', filters.timeRange.end);
+
+    if ((filters as any).applicationMonth) {
+      query = query.eq('application_month', (filters as any).applicationMonth as string);
+    }
+    if ((filters as any).customRange) {
+      const cr = (filters as any).customRange as { from: string; to: string };
+      query = query.gte('application_date', cr.from).lte('application_date', cr.to);
+    }
+
+    const { data: rawRows, error } = await query;
     if (error) return fail(500, 'Failed to fetch');
 
     let clicks = 0;

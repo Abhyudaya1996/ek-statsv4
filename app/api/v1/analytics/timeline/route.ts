@@ -20,8 +20,9 @@ export async function GET(req: NextRequest) {
 
     if (useMock || !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       const mock = await import('@/mock-data/timeline.json');
-      const data = mock.default.data;
-      const payload = view === 'month' ? data.months : data.days[month] ?? [];
+      const data = mock.default.data as { months: any[]; days: Record<string, any[]> };
+      const days = data.days as Record<string, any[]>;
+      const payload = view === 'month' ? data.months : (days[month] ?? []);
       return new Response(JSON.stringify(ok(payload, { version: 'v1' })), { headers: { 'Content-Type': 'application/json' } });
     }
 
@@ -55,7 +56,7 @@ export async function GET(req: NextRequest) {
       .from('Raw')
       .select('application_date, stage_code')
       .like('application_month', month)
-      .is('application_date', null, { not: true });
+      .not('application_date', 'is', null);
     if (error) return fail(500, 'Failed to fetch');
     const byDay: Record<string, any> = {};
     for (const r of rows ?? []) {
@@ -75,11 +76,12 @@ export async function GET(req: NextRequest) {
   } catch (e) {
     if (e instanceof SupabaseEnvError) {
       const mock = await import('@/mock-data/timeline.json');
-      const data = mock.default.data;
+      const data = mock.default.data as { months: any[]; days: Record<string, any[]> };
       const url = new URL(req.url);
       const view = (url.searchParams.get('view') as 'month' | 'day') || 'month';
       const month = url.searchParams.get('month') || '';
-      const payload = view === 'month' ? data.months : data.days[month] ?? [];
+      const days = data.days as Record<string, any[]>;
+      const payload = view === 'month' ? data.months : (days[month] ?? []);
       return new Response(JSON.stringify(ok(payload, { version: 'v1' })), { headers: { 'Content-Type': 'application/json' } });
     }
     return fail(500, 'Unexpected error');

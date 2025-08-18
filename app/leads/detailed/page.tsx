@@ -91,7 +91,7 @@ export default function DetailedLeadsPage() {
         onQualityChange={setQuality}
         banks={banks}
         onBanksChange={setBanks}
-        availableBanks={Array.from(new Set((q.data?.data ?? list).map((r: any) => r.bank))).filter(Boolean)}
+        availableBanks={Array.from(new Set(list.map((r: any) => String(r.bank ?? '')))).filter((b): b is string => Boolean(b))}
         onApply={() => { setPage(1); }}
       />
 

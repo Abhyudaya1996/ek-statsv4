@@ -5,6 +5,7 @@ import { formatPercentageSafe, formatCurrencyINR } from '@/lib/utils';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useFilters } from '@/hooks/use-filters';
 import { useFunnel } from '@/hooks/use-leads';
+import { FunnelChart, type FunnelStageDatum } from '@/components/charts/funnel-chart';
 
 export default function FunnelPage() {
   const { filters } = useFilters();
@@ -24,6 +25,17 @@ export default function FunnelPage() {
   }
 
   const { clicks, leads, stages, quality } = q.data as any;
+
+  const chartData: FunnelStageDatum[] = [
+    { label: 'Clicks', value: Number(clicks) || 0 },
+    { label: 'Leads', value: Number(leads) || 0 },
+    { label: 'Incomplete', value: Number(stages.incomplete) || 0 },
+    { label: 'KYC', value: Number(stages.kyc) || 0 },
+    { label: 'Verification', value: Number(stages.verification) || 0 },
+    { label: 'Rejected', value: Number(stages.rejected) || 0 },
+    { label: 'Expired', value: Number(stages.expired) || 0 },
+    { label: 'Approved', value: Number(stages.approved) || 0 },
+  ];
 
   const approvalRate = Number(formatPercentageSafe(stages.approved, leads).replace('%', '')) || 0;
   const rejectionRate = Number(formatPercentageSafe(stages.rejected, leads).replace('%', '')) || 0;
@@ -58,21 +70,10 @@ export default function FunnelPage() {
         <div className="rounded-lg border border-gray-200 bg-white p-3"><p className="text-xs text-gray-500">Rejection Rate</p><p className="text-xl font-bold">{formatPercentageSafe(stages.rejected, leads)}</p></div>
       </div>
 
-      {/* Scrollable vertical funnel for mobile */}
+      {/* Recharts-based funnel with stable legend and accessible labels */}
       <div className="rounded-xl bg-white p-4 shadow-sm">
         <h2 className="mb-4 text-base font-semibold">Lead Conversion Funnel</h2>
-        <div className="max-h-[360px] overflow-y-auto pr-1 space-y-3">
-          {bar('Clicks', clicks, '100%', 'bg-blue-500')}
-          {bar('Leads', leads, formatPercentageSafe(leads, clicks), 'bg-green-500')}
-          <div className="pl-6 space-y-2">
-            {bar('├ Incomplete', stages.incomplete, formatPercentageSafe(stages.incomplete, leads), 'bg-gray-400', 'h-6')}
-            {bar('├ KYC', stages.kyc, formatPercentageSafe(stages.kyc, leads), 'bg-yellow-500', 'h-6')}
-            {bar('├ Verification', stages.verification, formatPercentageSafe(stages.verification, leads), 'bg-indigo-500', 'h-6')}
-            {bar('├ Cardouts', stages.approved, formatPercentageSafe(stages.approved, leads), 'bg-emerald-600', 'h-6')}
-            {bar('├ Rejected', stages.rejected, formatPercentageSafe(stages.rejected, leads), 'bg-red-500', 'h-6')}
-            {bar('└ Expired', stages.expired, formatPercentageSafe(stages.expired, leads), 'bg-gray-500', 'h-6')}
-          </div>
-        </div>
+        <FunnelChart data={chartData} title="Lead Conversion Funnel" />
       </div>
 
       {/* Quality Analysis */}

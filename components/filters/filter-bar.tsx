@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import { useFilters } from '@/hooks/use-filters';
+import DateRangePickerModal, { type DateRange } from '@/components/ui/DateRangePicker';
 
 type FilterBarProps = {
   search?: string;
@@ -20,7 +21,9 @@ const STAGE_OPTIONS = ['Incomplete', 'KYC', 'Verification', 'Approved', 'Rejecte
 const QUALITY_OPTIONS = ['Good', 'Avg', 'Bad', 'Unknown'] as const;
 
 export function FilterBar(props: FilterBarProps) {
-  const { filters, setTimePreset, validationError } = useFilters();
+  const { filters, setTimePreset, setCustomRange, validationError } = useFilters();
+  const [showDateModal, setShowDateModal] = React.useState(false);
+  const [applicationMonth, setApplicationMonth] = React.useState<string>('');
   const {
     search,
     onSearchChange,
@@ -114,6 +117,7 @@ export function FilterBar(props: FilterBarProps) {
   };
 
   return (
+    <>
     <section aria-label="Filters" className="sticky top-0 z-10 w-full bg-white/80 p-3 backdrop-blur">
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-2">
@@ -145,6 +149,50 @@ export function FilterBar(props: FilterBarProps) {
           >
             Last 6
           </button>
+
+          {/* Application Month dropdown */}
+          <select
+            aria-label="Application Month"
+            value={applicationMonth}
+            onChange={e => {
+              const m = e.target.value;
+              setApplicationMonth(m);
+              if (!m) return;
+              // Update month range to single month
+              // Expect YYYY-MM
+              // Keep preset as custom to indicate explicit selection
+              (setTimePreset as any)('noop');
+              // Update via custom setter exposed in provider
+              setCustomRange(m, m);
+            }}
+            className="rounded-md border px-3 py-1 text-sm"
+          >
+            <option value="">Application Month…</option>
+            {/* Basic recent list: current, last-5 months */}
+            {Array.from({ length: 6 }).map((_, i) => {
+              const d = new Date();
+              d.setMonth(d.getMonth() - i);
+              const month = String(d.getMonth() + 1).padStart(2, '0');
+              const val = `${d.getFullYear()}-${month}`;
+              return (
+                <option key={val} value={val}>{val}</option>
+              );
+            })}
+          </select>
+
+          {/* Custom date range */}
+          <button
+            type="button"
+            onClick={() => setShowDateModal(true)}
+            className="rounded-md px-3 py-1 text-sm ring-1 ring-gray-300 focus:outline-none focus-visible:ring-2 bg-white"
+          >
+            Custom Range…
+          </button>
+          {filters.timeRange.preset === 'custom' && (filters as any).customRange && (
+            <span className="text-xs text-gray-600">
+              {(filters as any).customRange.from} → {(filters as any).customRange.to}
+            </span>
+          )}
         </div>
 
         {(onSearchChange || onStagesChange || onQualityChange || onBanksChange) && (
@@ -218,6 +266,15 @@ export function FilterBar(props: FilterBarProps) {
         </div>
       </div>
     </section>
+    <DateRangePickerModal
+      isOpen={showDateModal}
+      onClose={() => setShowDateModal(false)}
+      onChange={(range: DateRange) => {
+        setCustomRange(range.from.slice(0,7), range.to.slice(0,7));
+        (filters as any).customRange = range as any;
+      }}
+    />
+    </>
   );
 }
 

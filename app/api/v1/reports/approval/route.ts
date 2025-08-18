@@ -23,12 +23,20 @@ export async function GET(req: NextRequest) {
 
     const supabase = getServerClient();
 
-    const { data: rows, error } = await supabase
+    let query = supabase
       .from('Raw')
       .select('bank, stage_code, application_date, decision_date')
       .gte('application_month', filters.timeRange.start)
       .lte('application_month', filters.timeRange.end);
+    if ((filters as any).applicationMonth) {
+      query = query.eq('application_month', (filters as any).applicationMonth as string);
+    }
+    if ((filters as any).customRange) {
+      const cr = (filters as any).customRange as { from: string; to: string };
+      query = query.gte('application_date', cr.from).lte('application_date', cr.to);
+    }
 
+    const { data: rows, error } = await query;
     if (error) return fail(500, 'Failed to fetch');
 
     const byBank: Record<string, { total: number; approved: number; days: number[] }> = {};

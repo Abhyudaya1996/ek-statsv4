@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { STAGE_CODES, type StageCode } from './constants';
 
 const monthRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
+const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 
 export const StageCodeSchema = z.enum(
   (Object.values(STAGE_CODES).flat() as StageCode[]).map(c => c) as [StageCode, ...StageCode[]]
@@ -13,6 +14,15 @@ export const FiltersSchema = z.object({
     end: z.string().regex(monthRegex),
     preset: z.enum(['current_month', 'last_3_months', 'last_6_months', 'custom']).optional(),
   }),
+  // Optional day-level custom range used when preset === 'custom'
+  customRange: z
+    .object({
+      from: z.string().regex(dateRegex),
+      to: z.string().regex(dateRegex),
+    })
+    .optional(),
+  // Optional explicit single month selector
+  applicationMonth: z.string().regex(monthRegex).optional(),
   banks: z.array(z.string()).default([]),
   cards: z.array(z.string()).default([]),
   users: z.array(z.number().int().positive()).default([]),
