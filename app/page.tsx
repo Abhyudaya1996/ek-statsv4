@@ -62,7 +62,7 @@ export default function Page() {
 
       <h1 className="mt-2 text-lg font-bold text-gray-900 md:text-xl">EK Stats Dashboard</h1>
       <p className="mt-1 text-sm leading-5 text-gray-600">
-        <strong>Unlock Powerful Lead Analytics & Commission Insights</strong> — Effortlessly track lead performance, monitor commission earnings, and act on real-time insights.
+        <strong>Track Leads & Commission Analytics</strong>
       </p>
 
       {/* KPI Grid - upgraded commission metrics */}

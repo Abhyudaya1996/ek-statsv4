@@ -121,7 +121,10 @@ export function FilterBar(props: FilterBarProps) {
     <section aria-label="Filters" className="sticky top-0 z-10 w-full bg-white/80 p-3 backdrop-blur">
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium">Time:</span>
+          <span className="flex items-center gap-1 text-sm font-semibold text-gray-800">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M6.75 3a.75.75 0 0 1 .75.75V5h9V3.75a.75.75 0 0 1 1.5 0V5h.75A2.25 2.25 0 0 1 21 7.25v11A2.25 2.25 0 0 1 18.75 20.5H5.25A2.25 2.25 0 0 1 3 18.25v-11A2.25 2.25 0 0 1 5.25 5h.75V3.75A.75.75 0 0 1 6.75 3Zm12 7.5H5.25v7.75c0 .414.336.75.75.75h12.75a.75.75 0 0 0 .75-.75V10.5Z"/></svg>
+            Time
+          </span>
           <button
             type="button"
             onClick={() => setTimePreset('current')}

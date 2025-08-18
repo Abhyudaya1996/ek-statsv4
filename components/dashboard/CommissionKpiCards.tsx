@@ -12,7 +12,7 @@ export function CommissionKpiCards() {
     return (
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4" aria-busy="true">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-200" />
+          <div key={i} className="h-28 animate-pulse rounded-2xl bg-gray-200" />
         ))}
       </div>
     );
@@ -30,10 +30,22 @@ export function CommissionKpiCards() {
 
   return (
     <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
-      <KPICard title="Total Leads" value={totalLeads} format="number" ariaLabel="Total Leads" />
-      <KPICard title="Total Commission" value={totalCommission} format="currency" ariaLabel="Total Commission" />
-      <KPICard title="Pending Commission" value={pendingCommission} format="currency" ariaLabel="Pending Commission" />
-      <KPICard title="Paid Commission" value={paidCommission} format="currency" ariaLabel="Paid Commission" />
+      <div className="rounded-2xl border border-gray-200 bg-blue-50 p-4 shadow-sm">
+        <h3 className="mb-1 text-sm font-semibold text-gray-800">Total Leads</h3>
+        <div className="text-2xl font-bold text-gray-900">{totalLeads.toLocaleString('en-IN')}</div>
+      </div>
+      <div className="rounded-2xl border border-gray-200 bg-emerald-50 p-4 shadow-sm">
+        <h3 className="mb-1 text-sm font-semibold text-gray-800">Total Commission</h3>
+        <div className="text-2xl font-bold text-gray-900">{new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(totalCommission)}</div>
+      </div>
+      <div className="rounded-2xl border border-gray-200 bg-amber-50 p-4 shadow-sm">
+        <h3 className="mb-1 text-sm font-semibold text-gray-800">Pending Commission</h3>
+        <div className="text-2xl font-bold text-gray-900">{new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(pendingCommission)}</div>
+      </div>
+      <div className="rounded-2xl border border-gray-200 bg-purple-50 p-4 shadow-sm">
+        <h3 className="mb-1 text-sm font-semibold text-gray-800">Paid Commission</h3>
+        <div className="text-2xl font-bold text-gray-900">{new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(paidCommission)}</div>
+      </div>
     </section>
   );
 }
