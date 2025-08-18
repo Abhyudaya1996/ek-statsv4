@@ -1,22 +1,22 @@
 import '../styles/globals.css';
 import React from 'react';
 import Link from 'next/link';
+import { Public_Sans } from 'next/font/google';
 import { QueryProvider } from '@/providers/query-provider';
 import { FilterProvider } from '@/providers/filter-provider';
 import { AuthProvider } from '@/providers/auth-provider';
 import { LayoutDashboard, Filter, LineChart, List, BarChart3, CircleSlash2 } from 'lucide-react';
 import { DesktopMenu } from '@/components/layout/desktop-menu';
 
+const publicSans = Public_Sans({ subsets: ['latin'], weight: ['400', '600', '700'], display: 'swap' });
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="min-h-svh bg-gray-50 text-gray-900 antialiased">
+      <body className={`${publicSans.className} min-h-svh bg-gray-50 text-gray-900 antialiased`}>
         <AuthProvider>
           <QueryProvider>
             <FilterProvider>
