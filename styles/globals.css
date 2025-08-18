@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Third-party global styles */
+@import "react-datepicker/dist/react-datepicker.css";
+
 /* Accessibility: visible focus outlines */
 :focus-visible {
   outline: 2px solid rgb(59 130 246);

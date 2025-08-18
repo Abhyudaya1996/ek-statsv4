@@ -1,7 +1,6 @@
 "use client";
 import React from 'react';
 import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import { Calendar, X } from 'lucide-react';
 
 export type DateRange = { from: string; to: string };
