@@ -1,7 +1,6 @@
 "use client";
 import React from 'react';
 import { CommissionChart } from '@/components/charts/commission-chart';
-import { CommissionKpiCards } from '@/components/dashboard/CommissionKpiCards';
 import { FilterBar } from '@/components/filters/filter-bar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useFilters } from '@/hooks/use-filters';
@@ -65,10 +64,13 @@ export default function Page() {
         <strong>Unlock Powerful Lead Analytics & Commission Insights</strong> — Effortlessly track lead performance, monitor commission earnings, and act on real-time insights.
       </p>
 
-      {/* KPI Grid - upgraded commission metrics */}
-      <div className="mt-3">
-        <CommissionKpiCards />
-      </div>
+      {/* KPI Grid - vertical on mobile */}
+      <section className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+        <KPI emphasis bg="bg-blue-100 text-blue-600" Icon={Users} title="Total Leads" value={String(k.totalLeads ?? 0)} />
+        <KPI emphasis bg="bg-green-100 text-green-600" Icon={IndianRupee} title="Potential Commission" value={`₹${Number(k.potentialCommission ?? 0).toLocaleString('en-IN')}`} />
+        <KPI bg="bg-amber-100 text-amber-600" Icon={TrendingUp} title="Approval Rate" value={`${Number(k.approvalRate ?? 0).toFixed(1)}%`} />
+        <KPI bg="bg-red-100 text-red-600" Icon={AlertTriangle} title="Incomplete" value={String(k.incomplete ?? 0)} />
+      </section>
 
       {/* Commission Breakdown */}
       <section className="mt-6">
