@@ -3,8 +3,8 @@ import React from 'react';
 import { FilterBar } from '@/components/filters/filter-bar';
 // import { EmptyState } from '@/components/ui/empty-state';
 // import { useFilters } from '@/hooks/use-filters';
-import QualityAnalysis from '@/components/quality/QualityAnalysis';
-import HierarchicalFunnel from '@/components/charts/HierarchicalFunnel';
+import QualitySketch from '@/components/quality/QualitySketch';
+import HierarchicalFunnelSketch from '@/components/charts/HierarchicalFunnelSketch';
 
 export default function FunnelPage() {
   
@@ -19,11 +19,11 @@ export default function FunnelPage() {
       </p>
 
       <section className="mt-4">
-        <HierarchicalFunnel />
+        <HierarchicalFunnelSketch />
       </section>
 
       <div className="mt-6">
-        <QualityAnalysis />
+        <QualitySketch />
       </div>
     </>
   );
