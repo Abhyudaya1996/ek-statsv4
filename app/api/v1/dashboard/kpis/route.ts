@@ -30,27 +30,36 @@ export async function GET(req: NextRequest) {
     const monthStart = filters.timeRange.start;
     const monthEnd = filters.timeRange.end;
 
-    // Example query sketch; replace with real columns and filters
-    let query = supabase
+    // Build base query with exact count; page through results to avoid 1k cap
+    let base = supabase
       .from('Raw')
-      .select('application_id, stage_code, total_commission, ops_status, application_date, application_month')
+      .select('stage_code, total_commission, ops_status, application_date, application_month', { count: 'exact' })
       .gte('application_month', monthStart)
       .lte('application_month', monthEnd);
     if ((filters as any).applicationMonth) {
-      query = query.eq('application_month', (filters as any).applicationMonth as string);
+      base = base.eq('application_month', (filters as any).applicationMonth as string);
     }
     if ((filters as any).customRange) {
       const cr = (filters as any).customRange as { from: string; to: string };
-      query = query.gte('application_date', cr.from).lte('application_date', cr.to);
+      base = base.gte('application_date', cr.from).lte('application_date', cr.to);
     }
-    const { data: rows, error } = await query;
 
-    if (error) return fail(500, 'Failed to fetch');
+    const PAGE_SIZE = 1000;
+    const firstPage = await base.range(0, PAGE_SIZE - 1);
+    if (firstPage.error) return fail(500, 'Failed to fetch');
 
-    const totalLeads = rows?.length ?? 0;
-    const cardouts = rows?.filter(r => ['w', 'z'].includes((r as any).stage_code)).length ?? 0;
-    const incomplete = rows?.filter(r => ['a', 'b'].includes((r as any).stage_code)).length ?? 0;
-    const totalCommission = rows?.reduce((acc, r) => acc + Number((r as any).total_commission ?? 0), 0) ?? 0;
+    let rows = firstPage.data ?? [];
+    const totalRows = firstPage.count ?? rows.length;
+    for (let offset = rows.length; offset < totalRows; offset += PAGE_SIZE) {
+      const { data, error } = await base.range(offset, Math.min(offset + PAGE_SIZE - 1, totalRows - 1));
+      if (error) return fail(500, 'Failed to fetch');
+      if (data && data.length) rows = rows.concat(data);
+    }
+
+    const totalLeads = rows.length;
+    const cardouts = rows.filter(r => ['w', 'z'].includes((r as any).stage_code)).length;
+    const incomplete = rows.filter(r => ['a', 'b'].includes((r as any).stage_code)).length;
+    const totalCommission = rows.reduce((acc, r) => acc + Number((r as any).total_commission ?? 0), 0);
     const potentialCommission = totalCommission * 0.1;
     const approvalRate = safePct(cardouts, totalLeads);
 
