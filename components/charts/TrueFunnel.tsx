@@ -31,6 +31,9 @@ function useMeasure<T extends HTMLElement>() {
 const fmt = (n: number) => (n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `${(n / 1_000).toFixed(1)}k` : n.toLocaleString());
 
 export default function TrueFunnel({ data, rowHeight = 56, className }: Props) {
+  // Call hooks before any conditional returns
+  const { ref, width } = useMeasure<HTMLDivElement>();
+
   const baseline = Math.max(1, data.find(d => !d.parent)?.percentage ?? 100);
   const main = data.filter(d => !d.parent);
   if (main.length === 0) return null;
@@ -43,7 +46,6 @@ export default function TrueFunnel({ data, rowHeight = 56, className }: Props) {
   const h = rowHeight;
   const totalH = h * main.length; // no gaps
 
-  const { ref, width } = useMeasure<HTMLDivElement>();
   const w = Math.max(320, width || 720);
   const maxW = Math.min(900, w);
 

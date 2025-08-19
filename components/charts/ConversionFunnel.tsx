@@ -46,11 +46,14 @@ export default function ConversionFunnel({
   rounded = 8,
   showConversionRates = true,
 }: Props) {
+  // Hooks must be called before any early returns
+  const { ref, width } = useContainerWidth<HTMLDivElement>();
+  const [hoverIdx, setHoverIdx] = React.useState<number | null>(null);
+
   const cleaned = (data || []).filter((d) => d && Number.isFinite(d.percentage));
   if (cleaned.length === 0) return null;
 
   const baseline = Math.max(1, cleaned[0].percentage || 100);
-  const { ref, width } = useContainerWidth<HTMLDivElement>();
 
   const rows = cleaned.map((d, i) => {
     const pctTop = Math.max(0, Math.min(100, (d.percentage / baseline) * 100));
@@ -61,8 +64,6 @@ export default function ConversionFunnel({
     );
     return { ...d, pctTop, pctBottom, index: i };
   });
-
-  const [hoverIdx, setHoverIdx] = React.useState<number | null>(null);
 
   return (
     <div className={className}>

@@ -29,3 +29,4 @@ ek-statsv4/
 ek-statsv4-check/
 
 tsconfig.tsbuildinfo
+.vercel

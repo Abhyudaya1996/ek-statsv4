@@ -33,10 +33,9 @@ function useMeasure<T extends HTMLElement>() {
 const fmt = (n: number) => (n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `${(n / 1_000).toFixed(1)}k` : n.toLocaleString());
 
 export default function PremiumFunnel({ data, maxWidth = 800, minHeight = 48, className, showDropOff = true }: Props) {
+  const { ref, rect } = useMeasure<HTMLDivElement>();
   const segments = React.useMemo(() => (data || []).filter(d => d && Number.isFinite(d.percentage) && Number.isFinite(d.count)), [data]);
   if (!segments.length) return null;
-
-  const { ref, rect } = useMeasure<HTMLDivElement>();
   const width = Math.min(maxWidth, Math.max(320, rect.width || maxWidth));
   const gap = 10;
   const radius = 10;
