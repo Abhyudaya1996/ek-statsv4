@@ -59,15 +59,28 @@ export function FunnelChart({ rows }: Props) {
             width={180}
           />
           <Tooltip
-            formatter={(value: any, _name: any, { payload }: any) => {
-              return [`${payload.count.toLocaleString()} (${Number(payload.pct).toFixed(2)}%)`, payload.label];
+            formatter={(value: any, _name: any, item: any) => {
+              const row = item?.payload ?? {};
+              const rawCount = (row as any).count;
+              const rawPct = (row as any).pct;
+              const count: number = typeof rawCount === 'number' ? rawCount : Number(rawCount ?? 0) || 0;
+              const pctValFromRow: number = typeof rawPct === 'number' ? rawPct : Number(rawPct ?? 0) || 0;
+              const pctValFromValue: number = typeof value === 'number' ? value : Number(value ?? 0) || 0;
+              const pct: number = Number.isFinite(pctValFromRow) && pctValFromRow > 0 ? pctValFromRow : pctValFromValue;
+              const label: string = typeof (row as any).label === 'string' ? (row as any).label : '';
+              return [`${count.toLocaleString()} (${pct.toFixed(2)}%)`, label];
             }}
           />
           <Bar dataKey="pct" radius={[0, 6, 6, 0]} isAnimationActive>
             <LabelList
               dataKey="pct"
               position="right"
-              formatter={(v: number, entry: any) => `${entry.count.toLocaleString()}  •  ${v.toFixed(2)}%`}
+              formatter={(v: number | undefined, entry: any) => {
+                const countSource = typeof entry?.count === 'number' ? entry.count : (typeof entry?.payload?.count === 'number' ? entry.payload.count : 0);
+                const count = Number(countSource) || 0;
+                const pct = typeof v === 'number' ? v : Number(v ?? 0) || 0;
+                return `${count.toLocaleString()}  •  ${pct.toFixed(2)}%`;
+              }}
               className="text-[11px] fill-gray-800"
             />
             {rows.map((r) => (
