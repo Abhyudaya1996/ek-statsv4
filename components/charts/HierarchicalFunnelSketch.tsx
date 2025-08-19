@@ -37,28 +37,31 @@ export default function HierarchicalFunnelSketch() {
         Clicks &amp; Leads are 100%. Other stages are % of Leads; KYC Done/Pending are % of KYC.
       </p>
 
-      <div className="space-y-3">
+      {/* Centered readable layout */}
+      <div className="mx-auto w-full max-w-[560px]">
         {steps.map((s, i) => {
           const pct = Math.max(0, Math.min(100, s.pct));
           const dot = s.tone ? toneDot[s.tone] : 'bg-blue-600';
           return (
-            <div key={i} className="relative grid grid-cols-[auto,1fr] gap-3 pl-1">
-              <span className="absolute left-[6px] top-4 h-[calc(100%-8px)] w-0.5 bg-gray-200" aria-hidden />
-              <span className={`relative top-1 h-3 w-3 rounded-full ${dot}`} />
-              <div className={`grid gap-2 ${s.level ? 'pl-5' : ''}`}>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-medium text-gray-900">{s.name}</span>
-                  <span className="tabular-nums text-xs text-gray-600">
-                    {s.count.toLocaleString()} • {pct.toFixed(2)}%
-                  </span>
-                </div>
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-100">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-[width]"
-                    style={{ width: `${pct}%` }}
-                    aria-label={`${s.name} ${pct.toFixed(2)}%`}
-                  />
-                </div>
+            <div key={i} className="grid grid-cols-[180px,1fr,auto] items-center gap-3 py-1">
+              {/* Name (indented for children) */}
+              <div className={`flex items-center ${s.level ? 'pl-4' : ''}`}>
+                <span className={`mr-2 inline-block h-2.5 w-2.5 rounded-full ${dot}`} />
+                <span className="text-sm font-medium text-gray-900">{s.name}</span>
+              </div>
+
+              {/* Bar */}
+              <div className="h-3 w-full overflow-hidden rounded-full bg-gray-100">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-[width]"
+                  style={{ width: `${pct}%` }}
+                  aria-label={`${s.name} ${pct.toFixed(2)}%`}
+                />
+              </div>
+
+              {/* Count • % */}
+              <div className="tabular-nums text-xs text-gray-700">
+                {s.count.toLocaleString()} • {pct.toFixed(2)}%
               </div>
             </div>
           );
