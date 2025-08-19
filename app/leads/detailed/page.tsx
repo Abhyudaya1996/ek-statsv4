@@ -169,8 +169,9 @@ export default function DetailedLeadsPage() {
   ];
   const normalizedList: LeadRow[] = (list && list.length ? list : fallbackList).map((r) => {
     const stageLower = (r.stageBucket || '').toLowerCase();
-    const normalizedStage = stageLower.startsWith('kyc') ? 'KYC' : r.stageBucket;
-    return { ...r, stageBucket: normalizedStage };
+    const isKyc = stageLower.startsWith('kyc');
+    const subStage = isKyc ? (r.stageBucket.includes('Done') ? 'KYC Done' : r.stageBucket.includes('Pending') ? 'KYC Pending' : 'KYC') : undefined;
+    return { ...r, stageBucket: isKyc ? 'KYC' : r.stageBucket, description: subStage && subStage !== 'KYC' ? subStage : r.description };
   });
   const total = (data as any).meta?.total ?? list.length;
   const totalPages = Math.max(1, Math.ceil(total / 50));
