@@ -3,8 +3,9 @@ import React from 'react';
 import { FilterBar } from '@/components/filters/filter-bar';
 // import { EmptyState } from '@/components/ui/empty-state';
 // import { useFilters } from '@/hooks/use-filters';
-import QualitySketch from '@/components/quality/QualitySketch';
-import HierarchicalFunnelSketch from '@/components/charts/HierarchicalFunnelSketch';
+import ConversionFlowCards from '@/components/charts/ConversionFlowCards';
+import QualityAnalysis from '@/components/quality/QualityAnalysis';
+import { conversionFlow } from '@/mock-data/funnel-quality';
 
 export default function FunnelPage() {
   
@@ -19,11 +20,11 @@ export default function FunnelPage() {
       </p>
 
       <section className="mt-4">
-        <HierarchicalFunnelSketch />
+        <ConversionFlowCards data={conversionFlow} />
       </section>
 
       <div className="mt-6">
-        <QualitySketch />
+        <QualityAnalysis />
       </div>
     </>
   );

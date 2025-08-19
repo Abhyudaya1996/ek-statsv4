@@ -1,10 +1,13 @@
 'use client';
 
 import React from 'react';
+import { FilterBar } from '@/components/filters/filter-bar';
+import { useFilters } from '@/hooks/use-filters';
 import { AlertCircle, TrendingUp, XCircle, ChevronDown } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function RejectionReport() {
+  const { filters } = useFilters();
   const kpis = {
     totalRejections: 543,
     topReason: 'Policy Reject',
@@ -30,6 +33,7 @@ export default function RejectionReport() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 lg:pb-0">
+      <FilterBar />
       <div className="px-4 py-6">
         <h1 className="mb-1 text-lg font-bold text-gray-900 md:text-xl">Lead Rejection Report</h1>
         <p className="mb-4 text-sm leading-5 text-gray-600">
@@ -37,11 +41,7 @@ export default function RejectionReport() {
         </p>
         <h1 className="mb-6 text-2xl font-bold text-gray-900">Rejection Report</h1>
 
-        <div className="mb-6 flex gap-2">
-          <button className="rounded-full bg-green-600 px-4 py-2 text-sm font-medium text-white">Current</button>
-          <button className="rounded-full border bg-white px-4 py-2 text-sm font-medium text-gray-600">Last 3</button>
-          <button className="rounded-full border bg-white px-4 py-2 text-sm font-medium text-gray-600">Last 6</button>
-        </div>
+        {/* Time chips are already provided by FilterBar at the top */}
 
         <div className="mb-6 grid grid-cols-2 gap-3">
           <div className="rounded-2xl bg-white p-4 shadow-sm">

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { FilterBar } from '@/components/filters/filter-bar';
 import { ArrowLeft } from 'lucide-react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
@@ -43,22 +44,14 @@ export default function TimelinePage() {
     return (
       <div className="min-h-screen bg-gray-50 pb-20 lg:pb-0">
         <div className="px-4 py-6">
-          <h1 className="mb-1 text-lg font-bold text-gray-900 md:text-xl">Timeline</h1>
+          <FilterBar />
+          <h1 className="mb-1 mt-2 text-lg font-bold text-gray-900 md:text-xl">Timeline</h1>
           <p className="mb-2 text-sm leading-5 text-gray-600">
             Track lead progression over time — analyze monthly and daily trends to adjust strategy.
           </p>
           <h1 className="mb-6 text-2xl font-bold text-gray-900">Timeline</h1>
 
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex gap-2">
-              <button className="rounded-full bg-green-600 px-4 py-2 text-sm font-medium text-white">Current Month</button>
-              <select className="rounded-full border px-4 py-2 text-sm">
-                <option>All Quality</option>
-                <option>Good</option>
-                <option>Avg</option>
-                <option>Bad</option>
-              </select>
-            </div>
+          <div className="mb-6 flex items-center justify-end">
             <div className="inline-flex rounded-md border overflow-hidden">
               <button onClick={() => setMode('count')} className={`px-3 py-1 text-sm ${mode === 'count' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'}`}>Numbers</button>
               <button onClick={() => setMode('pct')} className={`px-3 py-1 text-sm ${mode === 'pct' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'}`}>%</button>

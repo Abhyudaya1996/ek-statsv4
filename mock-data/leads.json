@@ -3,7 +3,14 @@
   "data": [
     { "applicationId": "APP123", "applicantName": "Rahul Sharma", "applicationDate": "12-07-2025", "bank": "HDFC", "cardName": "Millennia", "stageBucket": "KYC", "quality": "Good", "description": "KYC pending", "commission": 1500, "commissionStatus": "pending" },
     { "applicationId": "APP124", "applicantName": "Asha Verma", "applicationDate": "05-07-2025", "bank": "Axis", "cardName": "ACE", "stageBucket": "Incomplete", "quality": "Unknown", "description": "Docs missing", "commission": 0, "commissionStatus": "pending" },
-    { "applicationId": "APP125", "applicantName": "Rohit Jain", "applicationDate": "03-07-2025", "bank": "HDFC", "cardName": "Regalia", "stageBucket": "Approved", "quality": "Good", "description": "Approved", "commission": 3000, "commissionStatus": "paid" }
+    { "applicationId": "APP125", "applicantName": "Rohit Jain", "applicationDate": "03-07-2025", "bank": "HDFC", "cardName": "Regalia", "stageBucket": "Approved", "quality": "Good", "description": "Approved", "commission": 3000, "commissionStatus": "paid" },
+    { "applicationId": "APP126", "applicantName": "Priya Nair", "applicationDate": "10-07-2025", "bank": "ICICI", "cardName": "Amazon Pay", "stageBucket": "Verification", "quality": "Avg", "description": "In verification queue", "commission": 1200, "commissionStatus": "pending" },
+    { "applicationId": "APP127", "applicantName": "Amit Gupta", "applicationDate": "09-07-2025", "bank": "SBI", "cardName": "SimplyCLICK", "stageBucket": "Rejected", "quality": "Bad", "description": "Policy reject", "commission": 0, "commissionStatus": "pending" },
+    { "applicationId": "APP128", "applicantName": "Neha Kulkarni", "applicationDate": "08-07-2025", "bank": "Axis", "cardName": "My Zone", "stageBucket": "KYC", "quality": "Good", "description": "KYC done", "commission": 1800, "commissionStatus": "pending" },
+    { "applicationId": "APP129", "applicantName": "Deepak Mehta", "applicationDate": "07-07-2025", "bank": "HDFC", "cardName": "Swiggy", "stageBucket": "Verification", "quality": "Avg", "description": "Awaiting bank check", "commission": 900, "commissionStatus": "pending" },
+    { "applicationId": "APP130", "applicantName": "Swati Singh", "applicationDate": "06-07-2025", "bank": "Kotak", "cardName": "811 Dream Different", "stageBucket": "Incomplete", "quality": "Unknown", "description": "Address proof missing", "commission": 0, "commissionStatus": "pending" },
+    { "applicationId": "APP131", "applicantName": "Vikram Rao", "applicationDate": "04-07-2025", "bank": "ICICI", "cardName": "Platinum", "stageBucket": "Approved", "quality": "Good", "description": "Approved", "commission": 2500, "commissionStatus": "paid" },
+    { "applicationId": "APP132", "applicantName": "Meera Joshi", "applicationDate": "02-07-2025", "bank": "HDFC", "cardName": "MoneyBack", "stageBucket": "Rejected", "quality": "Bad", "description": "Low credit score", "commission": 0, "commissionStatus": "pending" }
   ],
-  "meta": { "page": 1, "limit": 50, "total": 812, "version": "v1" }
+  "meta": { "page": 1, "limit": 50, "total": 10, "version": "v1" }
 }
