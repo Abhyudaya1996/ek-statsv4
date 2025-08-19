@@ -44,20 +44,20 @@ export default function ApprovalsReportPage() {
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-xs text-gray-500">Total Approvals</p>
-          <p className="text-xl font-bold text-gray-900">{kpis.totalApprovals}</p>
+          <p className="text-sm text-gray-500">Total Approvals</p>
+          <p className="mt-1 text-2xl font-semibold text-gray-900">{kpis.totalApprovals}</p>
         </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-xs text-gray-500">Approval Rate</p>
-          <p className="text-xl font-bold text-gray-900">{kpis.approvalRate.toFixed(1)}%</p>
+          <p className="text-sm text-gray-500">Approval Rate</p>
+          <p className="mt-1 text-2xl font-semibold text-gray-900">{kpis.approvalRate.toFixed(1)}%</p>
         </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-xs text-gray-500">Top Bank</p>
-          <p className="text-sm font-bold text-gray-900">{kpis.topBank.name} ({kpis.topBank.rate.toFixed(1)}%)</p>
+          <p className="text-sm text-gray-500">Top Bank</p>
+          <p className="mt-1 text-base font-semibold text-gray-900">{kpis.topBank.name} ({kpis.topBank.rate.toFixed(1)}%)</p>
         </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-xs text-gray-500">Avg Processing</p>
-          <p className="text-xl font-bold text-gray-900">{kpis.avgProcessingDays != null ? `${kpis.avgProcessingDays.toFixed(1)} days` : '—'}</p>
+          <p className="text-sm text-gray-500">Avg Processing</p>
+          <p className="mt-1 text-2xl font-semibold text-gray-900">{kpis.avgProcessingDays != null ? `${kpis.avgProcessingDays.toFixed(1)} days` : '—'}</p>
         </div>
       </section>
 
