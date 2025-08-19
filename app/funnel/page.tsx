@@ -4,7 +4,7 @@ import { FilterBar } from '@/components/filters/filter-bar';
 // import { EmptyState } from '@/components/ui/empty-state';
 // import { useFilters } from '@/hooks/use-filters';
 import QualityAnalysis from '@/components/quality/QualityAnalysis';
-import FunnelV2Root from '@/components/charts/FunnelV2Root';
+import HierarchicalFunnel from '@/components/charts/HierarchicalFunnel';
 
 export default function FunnelPage() {
   
@@ -19,7 +19,7 @@ export default function FunnelPage() {
       </p>
 
       <section className="mt-4">
-        <FunnelV2Root />
+        <HierarchicalFunnel />
       </section>
 
       <div className="mt-6">
