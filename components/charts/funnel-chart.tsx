@@ -59,16 +59,20 @@ export function FunnelChart({ rows }: Props) {
             width={180}
           />
           <Tooltip
-            formatter={(value: any, _name: any, item: any) => {
-              const row = item?.payload ?? {};
-              const rawCount = (row as any).count;
-              const rawPct = (row as any).pct;
-              const count: number = typeof rawCount === 'number' ? rawCount : Number(rawCount ?? 0) || 0;
-              const pctValFromRow: number = typeof rawPct === 'number' ? rawPct : Number(rawPct ?? 0) || 0;
-              const pctValFromValue: number = typeof value === 'number' ? value : Number(value ?? 0) || 0;
-              const pct: number = Number.isFinite(pctValFromRow) && pctValFromRow > 0 ? pctValFromRow : pctValFromValue;
-              const label: string = typeof (row as any).label === 'string' ? (row as any).label : '';
-              return [`${count.toLocaleString()} (${pct.toFixed(2)}%)`, label];
+            content={(props: any) => {
+              const active = props?.active;
+              const p = Array.isArray(props?.payload) ? props.payload[0] : undefined;
+              const row = p?.payload ?? {};
+              if (!active || !p) return null;
+              const count: number = typeof row.count === 'number' ? row.count : Number(row.count ?? 0) || 0;
+              const pct: number = typeof row.pct === 'number' ? row.pct : Number(row.pct ?? 0) || 0;
+              const label: string = typeof row.label === 'string' ? row.label : '';
+              return (
+                <div className="rounded-md border bg-white p-2 text-xs shadow" role="dialog" aria-live="polite">
+                  <div className="font-medium">{label}</div>
+                  <div>{count.toLocaleString()} ({pct.toFixed(2)}%)</div>
+                </div>
+              );
             }}
           />
           <Bar dataKey="pct" radius={[0, 6, 6, 0]} isAnimationActive>
