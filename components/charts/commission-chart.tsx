@@ -141,11 +141,11 @@ export function CommissionChart({ data, title = 'Commission Breakdown' }: { data
 			<div className="mt-4 pt-4 border-t border-gray-100">
 				<div className="grid grid-cols-2 gap-3">
 					<div className="text-center p-2 bg-green-50 rounded-lg">
-						<p className="text-xs text-green-600 font-medium">Available</p>
+						<p className="text-xs text-green-600 font-medium">Available for payment</p>
 						<p className="text-base font-bold text-green-700">{formatCurrency(confirmed)}</p>
 					</div>
 					<div className="text-center p-2 bg-amber-50 rounded-lg">
-						<p className="text-xs text-amber-600 font-medium">Processing</p>
+						<p className="text-xs text-amber-600 font-medium">Pending for confirmation</p>
 						<p className="text-base font-bold text-amber-700">{formatCurrency(data.pending)}</p>
 					</div>
 				</div>
