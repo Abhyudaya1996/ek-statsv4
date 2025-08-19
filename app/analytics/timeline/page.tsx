@@ -8,7 +8,7 @@ export default function TimelinePage() {
   const [view, setView] = useState<'month' | 'day' | 'breakdown'>('month');
   const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [selectedDay, setSelectedDay] = useState<string>('');
-  const [showPercentage, setShowPercentage] = useState(false);
+  const [mode, setMode] = useState<'count' | 'pct'>('count');
   const [breakdownType, setBreakdownType] = useState<'bank' | 'quality'>('bank');
 
   const monthlyData = [
@@ -18,11 +18,11 @@ export default function TimelinePage() {
   ];
 
   const dailyData = [
-    { date: '01 Dec', leads: 89, approved: 23, rejected: 18, kyc: 48 },
-    { date: '02 Dec', leads: 76, approved: 19, rejected: 15, kyc: 42 },
-    { date: '03 Dec', leads: 102, approved: 28, rejected: 24, kyc: 50 },
-    { date: '04 Dec', leads: 94, approved: 22, rejected: 21, kyc: 51 },
-    { date: '05 Dec', leads: 87, approved: 25, rejected: 16, kyc: 46 },
+    { date: '01 Jul', leads: 89, approved: 23, rejected: 18, kyc: 48 },
+    { date: '02 Jul', leads: 76, approved: 19, rejected: 15, kyc: 42 },
+    { date: '03 Jul', leads: 102, approved: 28, rejected: 24, kyc: 50 },
+    { date: '04 Jul', leads: 94, approved: 22, rejected: 21, kyc: 51 },
+    { date: '05 Jul', leads: 87, approved: 25, rejected: 16, kyc: 46 },
   ];
 
   const breakdownData = {
@@ -59,9 +59,10 @@ export default function TimelinePage() {
                 <option>Bad</option>
               </select>
             </div>
-            <button onClick={() => setShowPercentage(v => !v)} className="text-sm font-medium text-blue-600">
-              {showPercentage ? 'Numbers' : 'Percentage'}
-            </button>
+            <div className="inline-flex rounded-md border overflow-hidden">
+              <button onClick={() => setMode('count')} className={`px-3 py-1 text-sm ${mode === 'count' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'}`}>Numbers</button>
+              <button onClick={() => setMode('pct')} className={`px-3 py-1 text-sm ${mode === 'pct' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'}`}>%</button>
+            </div>
           </div>
 
           <div className="mb-6 rounded-2xl bg-white p-4 shadow-sm">
@@ -82,7 +83,8 @@ export default function TimelinePage() {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <div className="min-w-[720px] overflow-y-auto max-h-[420px] rounded-2xl bg-white shadow-sm">
             <table className="w-full">
               <thead className="border-b bg-gray-50">
                 <tr>
@@ -104,14 +106,15 @@ export default function TimelinePage() {
                     className="cursor-pointer hover:bg-gray-50"
                   >
                     <td className="px-3 py-3 text-sm font-medium">{row.month}</td>
-                    <td className="px-3 py-3 text-right text-sm">{showPercentage ? '100%' : row.clicks.toLocaleString()}</td>
-                    <td className="px-3 py-3 text-right text-sm">{showPercentage ? `${((row.leads / row.clicks) * 100).toFixed(1)}%` : row.leads}</td>
-                    <td className="px-3 py-3 text-right text-sm text-green-600">{showPercentage ? `${((row.approved / row.leads) * 100).toFixed(1)}%` : row.approved}</td>
-                    <td className="px-3 py-3 text-right text-sm text-red-600">{showPercentage ? `${((row.rejected / row.leads) * 100).toFixed(1)}%` : row.rejected}</td>
+                    <td className="px-3 py-3 text-right text-sm">{mode === 'pct' ? '100%' : row.clicks.toLocaleString()}</td>
+                    <td className="px-3 py-3 text-right text-sm">{mode === 'pct' ? `${((row.leads / row.clicks) * 100).toFixed(1)}%` : row.leads}</td>
+                    <td className="px-3 py-3 text-right text-sm text-green-600">{mode === 'pct' ? `${((row.approved / row.leads) * 100).toFixed(1)}%` : row.approved}</td>
+                    <td className="px-3 py-3 text-right text-sm text-red-600">{mode === 'pct' ? `${((row.rejected / row.leads) * 100).toFixed(1)}%` : row.rejected}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       </div>
@@ -128,12 +131,14 @@ export default function TimelinePage() {
               <span className="text-sm font-medium">Back</span>
             </button>
             <h2 className="text-lg font-bold">{selectedMonth || 'December 2024'}</h2>
-            <button onClick={() => setShowPercentage(v => !v)} className="text-sm text-blue-600">
-              {showPercentage ? 'Numbers' : '%'}
-            </button>
+            <div className="inline-flex rounded-md border overflow-hidden">
+              <button onClick={() => setMode('count')} className={`px-3 py-1 text-sm ${mode === 'count' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'}`}>Numbers</button>
+              <button onClick={() => setMode('pct')} className={`px-3 py-1 text-sm ${mode === 'pct' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'}`}>%</button>
+            </div>
           </div>
 
-          <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <div className="min-w-[720px] overflow-y-auto max-h-[420px] rounded-2xl bg-white shadow-sm">
             <table className="w-full">
               <thead className="border-b bg-gray-50">
                 <tr>
@@ -160,20 +165,21 @@ export default function TimelinePage() {
                     <td className="px-3 py-3 text-right text-sm font-semibold">{row.leads}</td>
                     <td className="px-3 py-3 text-right text-sm">
                       <span className="font-medium text-green-600">{row.approved}</span>
-                      {showPercentage && <span className="ml-1 text-xs text-gray-500">({((row.approved / row.leads) * 100).toFixed(0)}%)</span>}
+                      {mode === 'pct' && <span className="ml-1 text-xs text-gray-500">({((row.approved / row.leads) * 100).toFixed(0)}%)</span>}
                     </td>
                     <td className="px-3 py-3 text-right text-sm">
                       <span className="font-medium text-red-600">{row.rejected}</span>
-                      {showPercentage && <span className="ml-1 text-xs text-gray-500">({((row.rejected / row.leads) * 100).toFixed(0)}%)</span>}
+                      {mode === 'pct' && <span className="ml-1 text-xs text-gray-500">({((row.rejected / row.leads) * 100).toFixed(0)}%)</span>}
                     </td>
                     <td className="px-3 py-3 text-right text-sm">
                       <span className="font-medium text-blue-600">{row.kyc}</span>
-                      {showPercentage && <span className="ml-1 text-xs text-gray-500">({((row.kyc / row.leads) * 100).toFixed(0)}%)</span>}
+                      {mode === 'pct' && <span className="ml-1 text-xs text-gray-500">({((row.kyc / row.leads) * 100).toFixed(0)}%)</span>}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       </div>
