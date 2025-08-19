@@ -154,6 +154,24 @@ export default function DetailedLeadsPage() {
 
   const data = q.data as { data: LeadRow[]; meta: { page: number; limit: number; total: number } } | any;
   const list: LeadRow[] = Array.isArray((data as any).data) ? (data as any).data : (data as LeadRow[]);
+  // If no API data, fall back to provided mock of 10 items
+  const fallbackList: LeadRow[] = [
+    { applicantName:'MANISH E', applicationId:'25A21D78383320S2', bank:'HDFC', cardName:'Hdfc Diners Privilege Credit Card', applicationDate:'21-01-2025', quality:'Good Credit Score', commission:3220, stageBucket:'KYC Done', description:'', commissionStatus:'pending' },
+    { applicantName:'AKHIL P M', applicationId:'25A28D87312490H3', bank:'HDFC', cardName:'Hdfc Bank Freedom Credit Card', applicationDate:'28-01-2025', quality:'Good Credit Score', commission:2119, stageBucket:'Verification', description:'', commissionStatus:'pending' },
+    { applicantName:'SUNITA MANDE', applicationId:'25A28D87359990W2', bank:'HDFC', cardName:'Hdfc Shoppers Stop Credit Card', applicationDate:'28-01-2025', quality:'Good Credit Score', commission:2119, stageBucket:'Approved', description:'', commissionStatus:'paid' },
+    { applicantName:'KOLA PENTAYYA VARMA', applicationId:'25A30D88990890UO', bank:'HDFC', cardName:'Hdfc Swiggy Credit Card', applicationDate:'30-01-2025', quality:'Good Credit Score', commission:2119, stageBucket:'Rejected', description:'', commissionStatus:'pending' },
+    { applicantName:'ANMOL MADAN', applicationId:'25A31D90116550S3', bank:'HDFC', cardName:'Hdfc Shoppers Stop Credit Card', applicationDate:'31-01-2025', quality:'Good Credit Score', commission:2119, stageBucket:'Approved', description:'', commissionStatus:'paid' },
+    { applicantName:'SHIKA SUDESH DESAI', applicationId:'25B04D93742190WD', bank:'HDFC', cardName:'Hdfc Moneyback Credit Card', applicationDate:'04-02-2025', quality:'Good Credit Score', commission:2119, stageBucket:'Incomplete Application', description:'', commissionStatus:'pending' },
+    { applicantName:'PRABHU MALLAPPA TALWAR', applicationId:'25B08D97881310W2', bank:'HDFC', cardName:'Hdfc Tata Neu Plus Credit Card', applicationDate:'08-02-2025', quality:'Good Credit Score', commission:2119, stageBucket:'KYC Pending', description:'', commissionStatus:'pending' },
+    { applicantName:'VIKAS HARPHOOL', applicationId:'25B10D99691250QV', bank:'HDFC', cardName:'Hdfc Bank Business Regalia Gold Credit Card', applicationDate:'10-02-2025', quality:'Good Credit Score', commission:2542, stageBucket:'Verification', description:'', commissionStatus:'pending' },
+    { applicantName:'PRACHI TOMAR', applicationId:'25B12D02364300W6', bank:'HDFC', cardName:'Hdfc Swiggy Credit Card', applicationDate:'12-02-2025', quality:'Good Credit Score', commission:2119, stageBucket:'Incomplete Application', description:'', commissionStatus:'pending' },
+    { applicantName:'KUNDAN NILKANTHRA DEKATE', applicationId:'25B17D07610100WC', bank:'HDFC', cardName:'Hdfc Swiggy Credit Card', applicationDate:'17-02-2025', quality:'Good Credit Score', commission:2119, stageBucket:'Incomplete Application', description:'', commissionStatus:'pending' },
+  ];
+  const normalizedList: LeadRow[] = (list && list.length ? list : fallbackList).map((r) => {
+    const stageLower = (r.stageBucket || '').toLowerCase();
+    const normalizedStage = stageLower.startsWith('kyc') ? 'KYC' : r.stageBucket;
+    return { ...r, stageBucket: normalizedStage };
+  });
   const total = (data as any).meta?.total ?? list.length;
   const totalPages = Math.max(1, Math.ceil(total / 50));
 
@@ -208,7 +226,7 @@ export default function DetailedLeadsPage() {
 
       {/* Mobile Cards */}
       <div className="space-y-4 md:hidden">
-        {list.map(row => (
+        {normalizedList.slice(0, 10).map(row => (
           <div key={row.applicationId} className="card card-interactive p-4 fade-in">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center space-x-3">
@@ -237,6 +255,9 @@ export default function DetailedLeadsPage() {
                   if (parts.length === 3) {
                     if (parts[0].length === 4) {
                       return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    }
+                    if (parts[2].length === 4) {
+                      return `${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}-${parts[2]}`;
                     }
                   }
                   return row.applicationDate || '—';
@@ -286,7 +307,7 @@ export default function DetailedLeadsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {list.map(row => (
+                {normalizedList.slice(0, 10).map(row => (
                   <tr key={row.applicationId} className="hover:bg-gray-50 transition-colors duration-150">
                     <td className="px-6 py-4">
                       <div className="space-y-1">
