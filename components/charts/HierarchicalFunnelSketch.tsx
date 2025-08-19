@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { FUNNEL } from '@/mock-data/funnel-quality';
 
 type Step = {
   name: string;
@@ -10,18 +11,31 @@ type Step = {
   tone?: 'good' | 'warn' | 'bad';
 };
 
-const steps: Step[] = [
-  { name: 'Clicks', count: 60000, pct: 100, level: 0, tone: 'good' },
-  { name: 'Leads', count: 5000, pct: 100, level: 0, tone: 'good' },
-  { name: 'Incomplete Applications', count: 1993, pct: 39.03, level: 0, tone: 'warn' },
-  { name: 'KYC', count: 106, pct: 2.08, level: 0 },
-  { name: '— KYC Done', count: 30, pct: 28.3, level: 1, tone: 'good' },
-  { name: '— KYC Pending', count: 76, pct: 71.7, level: 1, tone: 'warn' },
-  { name: 'Verification', count: 41, pct: 0.8, level: 0 },
-  { name: 'Rejected', count: 1702, pct: 33.33, level: 0, tone: 'bad' },
-  { name: 'Expired', count: 610, pct: 11.95, level: 0 },
-  { name: 'Approved', count: 548, pct: 10.73, level: 0, tone: 'good' },
-];
+const TONE_BY_ID: Record<string, Step['tone']> = {
+  clicks: 'good',
+  leads: 'good',
+  incomplete: 'warn',
+  'kyc-done': 'good',
+  'kyc-pend': 'warn',
+  verify: undefined,
+  reject: 'bad',
+  expired: undefined,
+  approved: 'good',
+};
+
+const ORDER = ['clicks','leads','incomplete','kyc','kyc-done','kyc-pend','verify','reject','expired','approved'];
+
+function buildSteps(): Step[] {
+  return [...FUNNEL]
+    .sort((a,b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id))
+    .map(n => ({
+      name: n.label,
+      count: n.value,
+      pct: n.percent,
+      level: n.parent === 'kyc' ? 1 : 0,
+      tone: TONE_BY_ID[n.id],
+    }));
+}
 
 const toneDot: Record<NonNullable<Step['tone']>, string> = {
   good: 'bg-emerald-500',
@@ -39,7 +53,7 @@ export default function HierarchicalFunnelSketch() {
 
       {/* Centered readable layout */}
       <div className="mx-auto w-full max-w-[560px]">
-        {steps.map((s, i) => {
+        {buildSteps().map((s, i) => {
           const pct = Math.max(0, Math.min(100, s.pct));
           const dot = s.tone ? toneDot[s.tone] : 'bg-blue-600';
           return (
