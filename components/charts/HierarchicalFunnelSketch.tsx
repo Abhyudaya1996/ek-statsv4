@@ -112,10 +112,8 @@ export default function HierarchicalFunnelSketch() {
               <div className="h-3.5 w-full overflow-hidden rounded-full bg-gray-100">
                 <div
                   className="h-full rounded-full transition-[width]"
-                  style={{ width: `${pct}%` }}
+                  style={s.tone ? { width: `${pct}%`, backgroundColor: toneFill[s.tone] } : { width: `${pct}%` }}
                   aria-label={`${s.name} ${pct.toFixed(2)}%`}
-                  // inline tone color keeps contrast high
-                  {...(s.tone ? { style: { width: `${pct}%`, backgroundColor: toneFill[s.tone] } } : {})}
                 />
               </div>
 
