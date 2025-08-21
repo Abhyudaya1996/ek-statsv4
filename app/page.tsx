@@ -70,7 +70,6 @@ export default function Page() {
         <CommissionKpiCards />
       </div>
 
-      {/* Commission Breakdown */}
       <section className="mt-6">
         <CommissionChart data={c} title="Commission Breakdown" />
       </section>

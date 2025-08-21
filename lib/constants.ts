@@ -24,3 +24,28 @@ export const STAGE_LABELS: Record<keyof typeof STAGE_CODES, string> = {
   NON_COMMISSIONABLE: 'Non Commissionable',
 };
 
+export const TOOLTIP_COPY = {
+  commission: {
+    potential:
+      'Projected commission assuming 10% of pending leads convert — a conservative baseline from your past approvals.',
+    pendingConfirmation:
+      'Commission from approved leads that are still awaiting confirmation from the bank/network.',
+    available:
+      'Confirmed commission that’s ready to withdraw now.',
+    paid:
+      'Commission already withdrawn by you.',
+  },
+  funnel: {
+    clicks: 'Total clicks from your content.',
+    leads: 'Users who submitted an application with the bank.',
+    incomplete: 'Users who started the form but dropped off.',
+    kyc: 'Applicants currently at the KYC stage.',
+    verification: 'Bank is verifying documents/KYC — final decision pending.',
+  },
+  kpis: {
+    totalApprovals: 'Total card-outs.',
+    approvalRate: 'Card-outs ÷ Leads × 100.',
+    avgProcessing: 'Average time from application to card-out.',
+  },
+} as const;
+

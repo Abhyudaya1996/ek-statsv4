@@ -300,7 +300,22 @@ export default function DetailedLeadsPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {normalizedList.slice(0, 10).map(row => (
-                  <tr key={row.applicationId} className="hover:bg-gray-50 transition-colors duration-150">
+                  <tr 
+                    key={row.applicationId} 
+                    onClick={() => {
+                      // Future: Navigate to lead detail view
+                      console.log('Lead clicked:', row.applicationId);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        console.log('Lead selected:', row.applicationId);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    className="cursor-pointer hover:bg-gray-50 focus:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-150"
+                  >
                     <td className="px-6 py-4">
                       <div className="space-y-1">
                         <div className="font-semibold text-gray-900">{row.applicationId}</div>

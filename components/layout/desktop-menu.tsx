@@ -43,11 +43,11 @@ export function DesktopMenu() {
             onClick={() => setOpen(false)}
           />
           
-          {/* Menu Panel */}
+          {/* Menu Panel (left drawer on desktop) */}
           <aside
             role="dialog"
             aria-label="Navigation menu"
-            className="fixed right-0 top-0 z-50 h-full w-[85%] max-w-sm bg-white shadow-2xl slide-up"
+            className="fixed left-0 top-0 z-50 h-full w-[85%] max-w-sm bg-white shadow-2xl"
           >
             <div className="flex items-center justify-between border-b border-gray-200 p-6">
               <div className="flex items-center gap-3">

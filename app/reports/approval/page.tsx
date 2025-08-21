@@ -5,11 +5,27 @@ import { BankPerformanceChart } from '@/components/charts/bank-performance';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useFilters } from '@/hooks/use-filters';
 import { useApprovalReport } from '@/hooks/use-leads';
+import InfoTooltip from '@/components/ui/InfoTooltip';
+import { TOOLTIP_COPY } from '@/lib/constants';
 
 export default function ApprovalsReportPage() {
   const { filters } = useFilters();
   const q = useApprovalReport(filters as any);
   const [activeBank, setActiveBank] = React.useState<any | null>(null);
+  const [sortKey, setSortKey] = React.useState<'rate' | 'approvals' | 'leads'>('rate');
+  
+  const { kpis, banks } = q.data as any || { kpis: {}, banks: [] };
+  const sortedBanks = React.useMemo(() => {
+    const arr = Array.isArray(banks) ? [...banks] : [];
+    switch (sortKey) {
+      case 'approvals':
+        return arr.sort((a, b) => (b.approved ?? 0) - (a.approved ?? 0));
+      case 'leads':
+        return arr.sort((a, b) => (b.total ?? 0) - (a.total ?? 0));
+      default:
+        return arr.sort((a, b) => (b.rate ?? 0) - (a.rate ?? 0));
+    }
+  }, [banks, sortKey]);
 
   if (q.isLoading) {
     return (
@@ -23,8 +39,6 @@ export default function ApprovalsReportPage() {
   if (q.isError || !q.data) {
     return <EmptyState title="Unable to load approval report" message={(q.error as Error)?.message ?? 'Please try again.'} />;
   }
-
-  const { kpis, banks } = q.data as any;
 
   return (
     <>
@@ -43,20 +57,20 @@ export default function ApprovalsReportPage() {
       </div>
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-sm text-gray-500">Total Approvals</p>
+        <div className="rounded-2xl border bg-white p-4 shadow-sm">
+          <p className="flex items-center gap-1 text-sm text-gray-600 font-medium">Total Approvals <InfoTooltip side="top" text={TOOLTIP_COPY.kpis.totalApprovals} /></p>
           <p className="mt-1 text-2xl font-semibold text-gray-900">{kpis.totalApprovals}</p>
         </div>
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-sm text-gray-500">Approval Rate</p>
+        <div className="rounded-2xl border bg-white p-4 shadow-sm">
+          <p className="flex items-center gap-1 text-sm text-gray-600 font-medium">Approval Rate <InfoTooltip side="top" text={TOOLTIP_COPY.kpis.approvalRate} /></p>
           <p className="mt-1 text-2xl font-semibold text-gray-900">{kpis.approvalRate.toFixed(1)}%</p>
         </div>
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-sm text-gray-500">Top Bank</p>
+        <div className="rounded-2xl border bg-white p-4 shadow-sm">
+          <p className="text-sm text-gray-600 font-medium">Top Bank</p>
           <p className="mt-1 text-base font-semibold text-gray-900">{kpis.topBank.name} ({kpis.topBank.rate.toFixed(1)}%)</p>
         </div>
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-sm text-gray-500">Avg Processing</p>
+        <div className="rounded-2xl border bg-white p-4 shadow-sm">
+          <p className="flex items-center gap-1 text-sm text-gray-600 font-medium">Avg Processing <InfoTooltip side="top" text={TOOLTIP_COPY.kpis.avgProcessing} /></p>
           <p className="mt-1 text-2xl font-semibold text-gray-900">{kpis.avgProcessingDays != null ? `${kpis.avgProcessingDays.toFixed(1)} days` : '—'}</p>
         </div>
       </section>
@@ -68,7 +82,7 @@ export default function ApprovalsReportPage() {
         </div>
         {/* Horizontal card deck of top banks */}
         <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
-          {banks.slice(0, 10).map((b: any) => (
+          {sortedBanks.slice(0, 10).map((b: any) => (
             <button
               key={b.bank}
               onClick={() => setActiveBank(b)}
@@ -101,11 +115,14 @@ export default function ApprovalsReportPage() {
       <section className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-semibold">Top Performing Banks</h2>
-          <select className="rounded border px-2 py-1 text-sm">
-            <option>Sort by Rate</option>
-            <option>Sort by Approvals</option>
-            <option>Sort by Leads</option>
-          </select>
+          <label className="text-sm text-gray-600 inline-flex items-center gap-2">
+            Sort by
+            <select value={sortKey} onChange={(e)=> setSortKey(e.target.value as any)} className="rounded border px-2 py-1 text-sm">
+              <option value="rate">Approval Rate</option>
+              <option value="approvals">Cardouts</option>
+              <option value="leads">Leads</option>
+            </select>
+          </label>
         </div>
         <div className="overflow-x-auto pb-1">
           <table className="w-full text-sm align-middle">
@@ -120,8 +137,23 @@ export default function ApprovalsReportPage() {
               </tr>
             </thead>
             <tbody>
-              {banks.slice(0, 5).map((b: any, idx: number) => (
-                <tr key={b.bank} className="hover:bg-gray-50">
+              {sortedBanks.slice(0, 5).map((b: any, idx: number) => (
+                <tr 
+                  key={b.bank} 
+                  onClick={() => {
+                    // Future: Navigate to bank detail view
+                    console.log('Bank clicked:', b.bank);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      console.log('Bank selected:', b.bank);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  className="cursor-pointer hover:bg-gray-50 focus:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-150"
+                >
                   <td className="px-4 py-3">{idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center space-x-2">

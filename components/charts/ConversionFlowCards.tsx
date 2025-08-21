@@ -110,6 +110,16 @@ export default function ConversionFlowCards({ data }: { data: ConversionStage[] 
     setMounted(true);
   }, []);
 
+  const STAGE_TIPS: Record<string, string> = React.useMemo(() => ({
+    Clicks: 'Total clicks from your content',
+    Leads: 'Users who actually applied on bank.',
+    'Incomplete Applications': 'Users who started applications but dropped off.',
+    KYC: 'People who are at KYC stage.',
+    Verification: "Verification pending at bank's end.",
+    Approved: 'Successfully approved',
+    Rejected: 'Applications declined',
+  }), []);
+
   // simple count-up formatter
   const useCountUp = (target: number, durationMs = 700) => {
     const [val, setVal] = React.useState(0);
@@ -145,7 +155,12 @@ export default function ConversionFlowCards({ data }: { data: ConversionStage[] 
                 <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-50 ring-1 ring-inset ring-gray-200">
                   <Icon name={s.stage} color={s.color} />
                 </span>
-                <h4 className="text-[15px] font-semibold text-gray-900">{s.stage}</h4>
+                <div>
+                  <h4 className="text-[15px] font-semibold text-gray-900">{s.stage}</h4>
+                  {STAGE_TIPS[s.stage] && (
+                    <p className="text-xs text-gray-500 mt-0.5">{STAGE_TIPS[s.stage]}</p>
+                  )}
+                </div>
               </header>
               <StageMetrics
                 count={s.count}

@@ -1,4 +1,5 @@
 import '../styles/globals.css';
+import '@/styles/tooltip.css';
 import React from 'react';
 import Link from 'next/link';
 import { Public_Sans } from 'next/font/google';
@@ -26,11 +27,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <QueryProvider>
             <FilterProvider>
               <header className="sticky top-0 z-20 border-b bg-white px-4 py-3 md:px-6 lg:px-8">
-                <div className="mx-auto flex max-w-6xl items-center justify-between">
-                  <h1 className="text-lg font-semibold text-emerald-600">EK Stats</h1>
+                <div className="mx-auto flex max-w-6xl items-center gap-3">
+                  {/* Desktop: hamburger at far-left */}
                   <div className="hidden md:block">
                     <DesktopMenu />
                   </div>
+                  <h1 className="text-lg font-semibold text-emerald-600">EK Stats</h1>
+                  <div className="ml-auto" />
                 </div>
               </header>
               <main className="mx-auto max-w-6xl px-4 py-4 md:px-6 lg:px-8 with-bottom-nav-padding xl:pb-8">{children}</main>

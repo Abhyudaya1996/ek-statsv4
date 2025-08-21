@@ -31,6 +31,22 @@ export default function RejectionReport() {
 
   const [openIdx, setOpenIdx] = React.useState<number | null>(null);
 
+  // Derive quality per bank using rejection rate; add lead mix
+  const banksWithQuality = bankData.map((b) => {
+    const approvals = Math.max(0, (b.total ?? 0) - (b.rejected ?? 0));
+    const rejectionRate = (Math.max(0, b.rejected ?? 0) / Math.max(1, b.total)) * 100;
+    let quality: 'Good' | 'Avg' | 'Bad' | 'Unknown';
+    if (!b.total) quality = 'Unknown';
+    else if (rejectionRate < 25) quality = 'Good';
+    else if (rejectionRate < 50) quality = 'Avg';
+    else quality = 'Bad';
+    return { ...b, approvals, rejectionRate, quality };
+  });
+  const [qualityFilter, setQualityFilter] = React.useState<'all' | 'Good' | 'Avg' | 'Bad' | 'Unknown'>('all');
+  const filteredBanks = React.useMemo(() => (
+    qualityFilter === 'all' ? banksWithQuality : banksWithQuality.filter(b => b.quality === qualityFilter)
+  ), [banksWithQuality, qualityFilter]);
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20 lg:pb-0">
       <FilterBar />
@@ -65,7 +81,7 @@ export default function RejectionReport() {
           </div>
 
           <div className="rounded-2xl bg-white p-4 shadow-sm">
-            <p className="text-xs text-gray-500">Worst Bank</p>
+            <p className="text-xs text-gray-500">Bank with Most Rejects</p>
             <p className="text-lg font-bold text-gray-900">{kpis.worstBank}</p>
           </div>
         </div>
@@ -82,6 +98,62 @@ export default function RejectionReport() {
                 <Bar dataKey="rejected" fill="#EF4444" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+
+          {/* Quality table */}
+          <div className="mt-4">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-semibold">Bank quality overview</h3>
+              <label className="text-sm text-gray-600 inline-flex items-center gap-2">
+                Quality
+                <select value={qualityFilter} onChange={(e)=> setQualityFilter(e.target.value as any)} className="rounded border px-2 py-1 text-sm">
+                  <option value="all">All</option>
+                  <option value="Good">Good</option>
+                  <option value="Avg">Avg</option>
+                  <option value="Bad">Bad</option>
+                  <option value="Unknown">Unknown</option>
+                </select>
+              </label>
+            </div>
+            <div className="overflow-x-auto pb-1">
+              <table className="w-full text-sm align-middle">
+                <thead>
+                  <tr className="border-b">
+                    <th className="px-3 py-2 text-left">Bank</th>
+                    <th className="px-3 py-2 text-right">Leads</th>
+                    <th className="px-3 py-2 text-right">Rejected</th>
+                    <th className="px-3 py-2 text-right">Rejection Rate</th>
+                    <th className="px-3 py-2 text-right">Quality</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredBanks.map((b) => (
+                    <tr 
+                      key={b.bank}
+                      onClick={() => {
+                        // Future: Navigate to bank rejection detail view
+                        console.log('Bank clicked:', b.bank);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          console.log('Bank selected:', b.bank);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      className="cursor-pointer hover:bg-gray-50 focus:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-150"
+                    >
+                      <td className="px-3 py-2">{b.bank}</td>
+                      <td className="px-3 py-2 text-right">{b.total}</td>
+                      <td className="px-3 py-2 text-right">{b.rejected}</td>
+                      <td className="px-3 py-2 text-right">{b.rejectionRate.toFixed(1)}%</td>
+                      <td className={`px-3 py-2 text-right font-semibold ${b.quality==='Bad'?'text-red-600': b.quality==='Avg'?'text-amber-600': b.quality==='Good'?'text-emerald-600':'text-gray-600'}`}>{b.quality}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 

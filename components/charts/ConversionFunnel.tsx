@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import InfoTooltip from '@/components/ui/InfoTooltip';
+import { TOOLTIP_COPY } from '@/lib/constants';
 
 export type FunnelDatum = {
   stage: string;
@@ -49,6 +51,15 @@ export default function ConversionFunnel({
   // Hooks must be called before any early returns
   const { ref, width } = useContainerWidth<HTMLDivElement>();
   const [hoverIdx, setHoverIdx] = React.useState<number | null>(null);
+
+  // Stage tooltips (copy only; does not change data logic)
+  const STAGE_TIPS: Record<string, string> = React.useMemo(() => ({
+    Clicks: TOOLTIP_COPY.funnel.clicks,
+    Leads: TOOLTIP_COPY.funnel.leads,
+    'Incomplete Applications': TOOLTIP_COPY.funnel.incomplete,
+    KYC: TOOLTIP_COPY.funnel.kyc,
+    Verification: TOOLTIP_COPY.funnel.verification,
+  }), []);
 
   const cleaned = (data || []).filter((d) => d && Number.isFinite(d.percentage));
   if (cleaned.length === 0) return null;
@@ -105,8 +116,11 @@ export default function ConversionFunnel({
             return (
               <div key={row.stage} className="relative">
                 <div className="grid grid-cols-[auto,1fr,auto] items-center gap-3">
-                  <div className="min-w-[120px] pr-2 text-sm font-medium text-gray-900">
+                  <div className="min-w-[120px] pr-2 text-sm font-medium text-gray-900 flex items-center gap-1">
                     {row.stage}
+                    {STAGE_TIPS[row.stage] && (
+                      <InfoTooltip side="top" text={STAGE_TIPS[row.stage]} />
+                    )}
                   </div>
                   <div
                     className="relative"

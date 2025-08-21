@@ -14,10 +14,10 @@ const LABEL_BY_KEY: Record<QualityKey, string> = {
 };
 
 const TONE_BY_KEY: Record<QualityKey, string> = {
-  good: 'text-emerald-600',
-  avg: 'text-indigo-600',
-  bad: 'text-red-600',
-  unknown: 'text-gray-700',
+  good: 'text-emerald-700',   // success
+  avg: 'text-gray-800',       // neutral
+  bad: 'text-amber-700',      // warn
+  unknown: 'text-gray-800',   // neutral
 };
 
 export default function QualityAnalysis() {
@@ -61,8 +61,15 @@ function CategoryCard({ q }: { q: QualityKey }) {
   const leads = QUALITY_LEADS[q as keyof typeof QUALITY_LEADS] as number;
   const cardouts = CARD_OUTS[q as keyof typeof CARD_OUTS] as number;
   const rej = REJECTION[q as keyof typeof REJECTION] as { count: number; pct: number };
+  // background by quality
+  const bgByQ: Record<QualityKey, string> = {
+    good: 'bg-[#ecfdf5] border-[#d1fae5]',      // success bg
+    avg: 'bg-white border-[#eef2f7]',           // neutral
+    bad: 'bg-[#fff7ed] border-[#fde68a]',       // warn
+    unknown: 'bg-white border-[#eef2f7]',       // neutral
+  };
   return (
-    <section className="rounded-lg border bg-white p-3 shadow-sm">
+    <section className={`rounded-lg border p-3 shadow-sm ${bgByQ[q]}`}>
       <div className="mb-2 flex items-baseline justify-between">
         <h4 className="text-sm font-semibold text-gray-900">Quality <span className={tone}>{label}</span></h4>
       </div>
