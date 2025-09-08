@@ -4,7 +4,68 @@ import React from 'react';
 import { FilterBar } from '@/components/filters/filter-bar';
 import { useFilters } from '@/hooks/use-filters';
 import { AlertCircle, TrendingUp, XCircle, ChevronDown } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Bar, Line } from 'recharts';
+
+// Responsive hook for mobile/tablet/desktop breakpoints
+function useResponsive() {
+  const [width, setWidth] = React.useState(0);
+  React.useEffect(() => {
+    const onResize = () => setWidth(window.innerWidth || 0);
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  return { isMobile: width < 640, isTablet: width >= 640 && width < 768, isDesktop: width >= 768 } as const;
+}
+
+type RejectionRow = { bank: string; total: number; rejected: number; rejectionRate: number };
+
+function ResponsiveRejectionChart({ data }: { data: RejectionRow[] }) {
+  const { isMobile, isTablet } = useResponsive();
+
+  const config = React.useMemo(() => {
+    const legendPosition: 'top' | 'bottom' = isMobile ? 'bottom' : 'top';
+    return {
+      heightClass: isMobile ? 'h-72' : isTablet ? 'h-72' : 'h-80',
+      margins: { top: isMobile ? 12 : 20, right: isMobile ? 12 : 30, bottom: isMobile ? 32 : 20, left: isMobile ? 12 : 20 },
+      barCategoryGap: isMobile ? '25%' : isTablet ? '28%' : '30%',
+      barGap: isMobile ? 4 : 6,
+      maxBarSize: isMobile ? 18 : isTablet ? 25 : 32,
+      fontSize: { tick: isMobile ? 9 : isTablet ? 11 : 12, legend: isMobile ? 11 : 13, tooltip: isMobile ? 11 : 13 },
+      xAxis: { tickMargin: isMobile ? 3 : 8, angle: (isMobile ? -35 : 0) as any, textAnchor: (isMobile ? 'end' : 'middle') as any, height: isMobile ? 50 : 35 },
+      yAxisWidth: { left: isMobile ? 25 : 35, right: isMobile ? 25 : 30 },
+      line: { strokeWidth: isMobile ? 2 : 2.5, dotRadius: isMobile ? 3 : 4, activeDotRadius: isMobile ? 4 : 5 },
+      legend: { height: isMobile ? 28 : 35, padding: 6, position: legendPosition },
+    };
+  }, [isMobile, isTablet]);
+
+  return (
+    <div className={`w-full ${config.heightClass} min-h-0`}>
+      <ResponsiveContainer width="100%" height="100%">
+        <ComposedChart data={data} margin={config.margins as any} barCategoryGap={config.barCategoryGap as any} barGap={config.barGap as any}>
+          <CartesianGrid strokeDasharray="2 2" opacity={0.4} />
+          <XAxis dataKey="bank" tickMargin={config.xAxis.tickMargin} tick={{ fontSize: config.fontSize.tick, fill: '#6B7280' }} interval={0} angle={config.xAxis.angle} textAnchor={config.xAxis.textAnchor} height={config.xAxis.height} axisLine={{ stroke: '#D1D5DB' }} />
+          <YAxis yAxisId="left" tick={{ fontSize: config.fontSize.tick, fill: '#6B7280' }} width={config.yAxisWidth.left} axisLine={{ stroke: '#D1D5DB' }} label={isMobile ? undefined : { value: 'Count', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontSize: config.fontSize.tick } } as any} />
+          <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tick={{ fontSize: config.fontSize.tick, fill: '#6B7280' }} width={config.yAxisWidth.right} axisLine={{ stroke: '#D1D5DB' }} label={isMobile ? undefined : { value: 'Rejection Rate %', angle: 90, position: 'insideRight', style: { textAnchor: 'middle', fontSize: config.fontSize.tick } } as any} />
+          <Tooltip contentStyle={{ fontSize: `${config.fontSize.tooltip}px`, padding: isMobile ? '6px 8px' : '8px 12px', backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '6px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} labelStyle={{ fontWeight: 600, marginBottom: '4px' }} formatter={(v: any, name: string) => [name === 'rejectionRate' ? `${v}%` : v, name === 'rejectionRate' ? 'Rejection Rate' : name === 'total' ? 'Total Leads' : 'Rejected']} />
+          <Legend 
+            verticalAlign={config.legend.position}
+            height={config.legend.height} 
+            wrapperStyle={{ 
+              paddingTop: config.legend.position === 'bottom' ? 6 : 0, 
+              paddingBottom: config.legend.position === 'top' ? 6 : 0, 
+              fontSize: config.fontSize.legend, fontWeight: 500 
+            } as any} 
+            iconType="rect" 
+          />
+          <Bar yAxisId="left" dataKey="total" name="Total Leads" fill="#60A5FA" maxBarSize={config.maxBarSize} radius={[1,1,0,0]} stroke="#3B82F6" strokeWidth={0.5} />
+          <Bar yAxisId="left" dataKey="rejected" name="Rejected" fill="#EF4444" maxBarSize={config.maxBarSize} radius={[1,1,0,0]} stroke="#DC2626" strokeWidth={0.5} />
+          <Line yAxisId="right" type="monotone" dataKey="rejectionRate" name="Rejection Rate %" stroke="#F59E0B" strokeWidth={config.line.strokeWidth} dot={{ r: config.line.dotRadius, fill: '#F59E0B', stroke: '#D97706', strokeWidth: 1 }} activeDot={{ r: config.line.activeDotRadius, fill: '#D97706', stroke: '#92400E', strokeWidth: 2 }} />
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
 
 export default function RejectionReport() {
   const { filters } = useFilters();
@@ -87,18 +148,8 @@ export default function RejectionReport() {
         </div>
 
         <div className="mb-6 rounded-2xl bg-white p-4 shadow-sm">
-          <h2 className="mb-4 text-base font-semibold">Bank-wise Rejections</h2>
-          <div className="h-[240px] sm:h-[300px] md:h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={bankData}>
-                <CartesianGrid stroke="#f0f0f0" strokeDasharray="3 3" />
-                <XAxis dataKey="bank" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="rejected" fill="#EF4444" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <h2 className="mb-4 text-base font-semibold">Leads vs Rejected (by Bank)</h2>
+          <ResponsiveRejectionChart data={banksWithQuality.map(b => ({ bank: b.bank, total: b.total, rejected: b.rejected, rejectionRate: b.rejectionRate }))} />
 
           {/* Quality table */}
           <div className="mt-4">

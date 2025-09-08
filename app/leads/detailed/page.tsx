@@ -24,6 +24,16 @@ type LeadRow = {
   commissionStatus: 'pending' | 'paid';
 };
 
+function formatDMY(dateStr?: string) {
+  if (!dateStr) return '—';
+  const parts = String(dateStr).split('-');
+  if (parts.length === 3) {
+    if (parts[0].length === 4) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    if (parts[2].length === 4) return `${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}-${parts[2]}`;
+  }
+  return dateStr;
+}
+
 function useDebouncedValue<T>(value: T, delay = 300) {
   const [debounced, setDebounced] = React.useState(value);
   React.useEffect(() => {
@@ -216,156 +226,37 @@ export default function DetailedLeadsPage() {
         <span>Page {page} of {totalPages}</span>
       </div>
 
-      {/* Mobile Cards */}
-      <div className="space-y-4 md:hidden">
-        {normalizedList.slice(0, 10).map(row => (
-          <div key={row.applicationId} className="card card-interactive p-4 fade-in">
+      {/* Unified stacked list (all breakpoints) */}
+      <div className="space-y-4">
+        {normalizedList.slice(0, 20).map(row => (
+          <div key={row.applicationId} className="rounded-xl border bg-white p-4 shadow-sm hover:shadow transition cursor-pointer" role="button" aria-label={`Open ${row.applicationId}`}>
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center space-x-3">
                 <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-100 text-blue-600">
                   <Building2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">{row.bank}</p>
-                  <p className="text-xs text-gray-500 flex items-center gap-1">
-                    <CreditCard className="w-3 h-3" />
-                    {row.cardName}
-                  </p>
+                  <p className="font-semibold text-gray-900">{row.bank || '—'}</p>
+                  <p className="text-xs text-gray-500 flex items-center gap-1"><CreditCard className="w-3 h-3" />{row.cardName || '—'}</p>
                 </div>
               </div>
-              <span className={getBadgeClass('stage', row.stageBucket)}>
-                {row.stageBucket}
-              </span>
+              <span className={getBadgeClass('stage', row.stageBucket)}>{row.stageBucket}</span>
             </div>
-            
-            <div className="space-y-2 mb-4">
-              <p className="font-medium text-gray-900">{row.applicantName || '—'}</p>
-              <p className="text-sm text-gray-600">ID: {row.applicationId}</p>
-              <p className="text-sm text-gray-500">
-                {(() => {
-                  const parts = (row.applicationDate || '').split('-');
-                  if (parts.length === 3) {
-                    if (parts[0].length === 4) {
-                      return `${parts[2]}-${parts[1]}-${parts[0]}`;
-                    }
-                    if (parts[2].length === 4) {
-                      return `${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}-${parts[2]}`;
-                    }
-                  }
-                  return row.applicationDate || '—';
-                })()}
-              </p>
+
+            <div className="space-y-1 text-sm">
+              <div><span className="text-gray-500">Applicant:</span> {row.applicantName || '—'}</div>
+              <div><span className="text-gray-500">Application ID:</span> {row.applicationId}</div>
+              <div><span className="text-gray-500">Date:</span> {formatDMY(row.applicationDate)}</div>
+              <div className="flex items-center gap-2"><span className="text-gray-500">Quality:</span><span className={getBadgeClass('quality', row.quality)}>{row.quality}</span></div>
             </div>
-            
-            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-              <span className={getBadgeClass('quality', row.quality)}>
-                {row.quality}
-              </span>
-              <div className="text-right">
-                <p className="font-bold text-gray-900">{formatCurrencyINR(row.commission)}</p>
-                <p className={`text-xs font-medium ${
-                  row.commissionStatus === 'paid' ? 'text-emerald-600' : 'text-amber-600'
-                }`}>
-                  {row.commissionStatus}
-                </p>
-              </div>
+
+            <div className="mt-3 flex items-center justify-between">
+              <div className="text-sm text-gray-500">Commission</div>
+              <div className="text-base font-semibold text-gray-900">{formatCurrencyINR(row.commission)}</div>
             </div>
           </div>
         ))}
       </div>
-
-      {/* Desktop Table */}
-      <section className="hidden md:block">
-        <div className="card overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Lead Information
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Bank & Card
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Quality
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Commission
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {normalizedList.slice(0, 10).map(row => (
-                  <tr 
-                    key={row.applicationId} 
-                    onClick={() => {
-                      // Future: Navigate to lead detail view
-                      console.log('Lead clicked:', row.applicationId);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        console.log('Lead selected:', row.applicationId);
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    className="cursor-pointer hover:bg-gray-50 focus:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-150"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="space-y-1">
-                        <div className="font-semibold text-gray-900">{row.applicationId}</div>
-                        <div className="text-sm text-gray-600">{row.applicantName || '—'}</div>
-                        <div className="text-xs text-gray-500">{row.applicationDate}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 text-blue-600">
-                          <Building2 className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-900">{row.bank}</div>
-                          <div className="text-sm text-gray-500">{row.cardName}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={getBadgeClass('stage', row.stageBucket)}>
-                        {row.stageBucket}
-                      </span>
-                      {row.description && (
-                        <div className="text-xs text-gray-500 mt-1">{row.description}</div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={getBadgeClass('quality', row.quality)}>
-                        {row.quality}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="space-y-1">
-                        <div className="font-semibold text-gray-900">
-                          {formatCurrencyINR(row.commission)}
-                        </div>
-                        <div className={`text-xs font-medium ${
-                          row.commissionStatus === 'paid' ? 'text-emerald-600' : 'text-amber-600'
-                        }`}>
-                          {row.commissionStatus}
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
 
       {/* Pagination */}
       <nav className="flex items-center justify-between" aria-label="Pagination">

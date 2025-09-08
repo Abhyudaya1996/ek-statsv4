@@ -6,7 +6,7 @@ import { FilterBar } from '@/components/filters/filter-bar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useFilters } from '@/hooks/use-filters';
 import { useDashboardKpis, useCommission } from '@/hooks/use-leads';
-import { Users, IndianRupee, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Users, IndianRupee, TrendingUp, AlertTriangle } from 'lucide-react';
 
 export default function Page() {
   const { filters } = useFilters();
@@ -65,36 +65,16 @@ export default function Page() {
         <strong>Track Leads & Commission Analytics</strong>
       </p>
 
-      {/* KPI Grid - upgraded commission metrics */}
+      {/* Commission Overview (summary only) */}
       <div className="mt-3">
         <CommissionKpiCards />
       </div>
 
+      {/* Unified chart + interactive breakdown */}
       <section className="mt-6">
-        <CommissionChart data={c} title="Commission Breakdown" />
+        <CommissionChart data={c} title="Commission Overview" />
       </section>
 
-      {/* Recent Activity (static sample) */}
-      <section className="mt-6 rounded-xl bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold">Recent Activity</h2>
-        <div className="space-y-3">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="flex items-center justify-between py-2">
-              <div className="flex items-center space-x-3">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                <div>
-                  <p className="text-sm font-medium">Lead #{4500 + i} Approved</p>
-                  <p className="text-xs text-gray-500">HDFC Bank - Regalia</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-semibold text-green-600">+₹{(1000 + i * 100).toLocaleString('en-IN')}</p>
-                <p className="text-xs text-gray-500">10 mins ago</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
     </>
   );
 }

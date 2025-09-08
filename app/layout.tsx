@@ -8,6 +8,7 @@ import { FilterProvider } from '@/providers/filter-provider';
 import { AuthProvider } from '@/providers/auth-provider';
 import { DesktopMenu } from '@/components/layout/desktop-menu';
 import { BottomNav } from '@/components/layout/bottom-nav';
+import { StateFilter } from '@/components/filters/state-filter';
 
 const publicSans = Public_Sans({ subsets: ['latin'], weight: ['400', '600', '700'], display: 'swap' });
 
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </div>
                   <h1 className="text-lg font-semibold text-emerald-600">EK Stats</h1>
                   <div className="ml-auto" />
+                  <StateFilter className="hidden md:block" />
                 </div>
               </header>
               <main className="mx-auto max-w-6xl px-4 py-4 md:px-6 lg:px-8 with-bottom-nav-padding xl:pb-8">{children}</main>

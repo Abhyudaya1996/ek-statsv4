@@ -1,0 +1,284 @@
+# Product Requirements Document: Supabase Data Integration - EK Application Analytics
+
+## 1. Overview
+
+This PRD outlines the integration of Supabase database tables to create a comprehensive analytics dashboard for EK Application tracking and commission management.
+
+## 2. Database Schema
+
+### 2.1 Primary Table: EK Application Table
+
+```sql
+create table public."EK Application Table" (
+    application_id text not null,
+    applicant_name text null,
+    application_date text null,
+    decision_date text null,
+    bank text null,
+    card_name text null,
+    application_quality text null,
+    stage text null,
+    sub_stage text null,
+    rejection_reason text null,
+    rejection_category text null,
+    ck_crm_status text null,
+    total_commission text null,
+    commission_for_validations text null,
+    stage_code text null,
+    sub_stage_code text null,
+    clean_exit text null,
+    user_id bigint null,
+    ops_status text null,
+    username text null,
+    store_name text null,
+    constraint EK Application Table_pkey primary key (application_id)
+) TABLESPACE pg_default;
+```
+
+### 2.2 Secondary Table: Stage Map
+*Note: Schema to be defined for mapping stage codes to descriptions*
+
+## 3. Data Filters and Date Logic
+
+### 3.1 Time-based Filters
+- **Current Month**: Latest month based on `application_date` sorting (Currently: August)
+- **Last 3 Months**: August, July, June
+- **Last 6 Months**: August, July, June, May, April, March
+
+### 3.2 Commission Calculations
+
+| Filter | Logic |
+|--------|-------|
+| **Potential Commission** | Sum of `total_commission` where `stage_code` ∈ ['z', 'w'] + 10% of `stage_code` ∈ ['a', 'b', 'c', 'd', 'e', 'f', 's'] |
+| **Pending for Confirmation** | Sum of `total_commission` where `stage_code` = 'z' AND `ops_status` = 'Pending' |
+| **Available for Payment** | Sum of `total_commission` where `ops_status` = 'Confirmed' |
+| **Paid Commission** | Sum of `total_commission` where `ops_status` = 'Paid' |
+
+## 4. Funnel Analytics
+
+### 4.1 Static Click Data 
+
+#### Monthly Totals
+| Month | Clicks |
+|-------|--------|
+| Jan | 33,242 |
+| Feb | 17,452 |
+| Mar | 14,267 |
+| Apr | 14,049 |
+| May | 16,919 |
+| Jun | 22,149 |
+| Jul | 40,706 |
+| Aug | 9,316 |
+| **Total** | **168,100** |
+
+#### Daily Click Breakdown
+
+**January (Total: 33,242)**
+| Date | Clicks | Date | Clicks | Date | Clicks |
+|------|--------|------|--------|------|--------|
+| 01-Jan | 2,939 | 11-Jan | 1,645 | 21-Jan | 479 |
+| 02-Jan | 687 | 12-Jan | 707 | 22-Jan | 299 |
+| 03-Jan | 2,164 | 13-Jan | 363 | 23-Jan | 2,790 |
+| 04-Jan | 549 | 14-Jan | 2,051 | 24-Jan | 336 |
+| 05-Jan | 1,538 | 15-Jan | 529 | 25-Jan | 437 |
+| 06-Jan | 602 | 16-Jan | 612 | 26-Jan | 388 |
+| 07-Jan | 814 | 17-Jan | 2,477 | 27-Jan | 252 |
+| 08-Jan | 1,694 | 18-Jan | 729 | 28-Jan | 987 |
+| 09-Jan | 473 | 19-Jan | 967 | 29-Jan | 873 |
+| 10-Jan | 399 | 20-Jan | 2,997 | 30-Jan | 701 |
+|  |  |  |  | 31-Jan | 764 |
+
+**February (Total: 17,452)**
+| Date | Clicks | Date | Clicks | Date | Clicks |
+|------|--------|------|--------|------|--------|
+| 01-Feb | 177 | 10-Feb | 478 | 19-Feb | 356 |
+| 02-Feb | 150 | 11-Feb | 587 | 20-Feb | 232 |
+| 03-Feb | 168 | 12-Feb | 503 | 21-Feb | 1,570 |
+| 04-Feb | 751 | 13-Feb | 477 | 22-Feb | 2,159 |
+| 05-Feb | 465 | 14-Feb | 1,028 | 23-Feb | 291 |
+| 06-Feb | 844 | 15-Feb | 758 | 24-Feb | 287 |
+| 07-Feb | 608 | 16-Feb | 570 | 25-Feb | 818 |
+| 08-Feb | 485 | 17-Feb | 497 | 26-Feb | 403 |
+| 09-Feb | 493 | 18-Feb | 364 | 27-Feb | 995 |
+|  |  |  |  | 28-Feb | 938 |
+
+**March (Total: 14,267)**
+| Date | Clicks | Date | Clicks | Date | Clicks |
+|------|--------|------|--------|------|--------|
+| 01-Mar | 177 | 12-Mar | 353 | 23-Mar | 1,010 |
+| 02-Mar | 165 | 13-Mar | 207 | 24-Mar | 349 |
+| 03-Mar | 654 | 14-Mar | 138 | 25-Mar | 293 |
+| 04-Mar | 280 | 15-Mar | 248 | 26-Mar | 377 |
+| 05-Mar | 444 | 16-Mar | 297 | 27-Mar | 485 |
+| 06-Mar | 166 | 17-Mar | 1,665 | 28-Mar | 465 |
+| 07-Mar | 540 | 18-Mar | 687 | 29-Mar | 365 |
+| 08-Mar | 424 | 19-Mar | 327 | 30-Mar | 400 |
+| 09-Mar | 176 | 20-Mar | 710 | 31-Mar | 847 |
+| 10-Mar | 100 | 21-Mar | 446 |  |  |
+| 11-Mar | 742 | 22-Mar | 730 |  |  |
+
+**April (Total: 14,049)**
+| Date | Clicks | Date | Clicks | Date | Clicks |
+|------|--------|------|--------|------|--------|
+| 01-Apr | 413 | 11-Apr | 236 | 21-Apr | 232 |
+| 02-Apr | 412 | 12-Apr | 278 | 22-Apr | 326 |
+| 03-Apr | 626 | 13-Apr | 208 | 23-Apr | 323 |
+| 04-Apr | 407 | 14-Apr | 1,232 | 24-Apr | 426 |
+| 05-Apr | 155 | 15-Apr | 297 | 25-Apr | 1,089 |
+| 06-Apr | 217 | 16-Apr | 308 | 26-Apr | 425 |
+| 07-Apr | 215 | 17-Apr | 712 | 27-Apr | 357 |
+| 08-Apr | 809 | 18-Apr | 395 | 28-Apr | 169 |
+| 09-Apr | 966 | 19-Apr | 308 | 29-Apr | 1,299 |
+| 10-Apr | 415 | 20-Apr | 208 | 30-Apr | 586 |
+
+**May (Total: 16,919)**
+| Date | Clicks | Date | Clicks | Date | Clicks |
+|------|--------|------|--------|------|--------|
+| 01-May | 210 | 12-May | 493 | 23-May | 82 |
+| 02-May | 443 | 13-May | 362 | 24-May | 950 |
+| 03-May | 679 | 14-May | 101 | 25-May | 427 |
+| 04-May | 811 | 15-May | 100 | 26-May | 1,092 |
+| 05-May | 828 | 16-May | 664 | 27-May | 187 |
+| 06-May | 1,235 | 17-May | 634 | 28-May | 147 |
+| 07-May | 284 | 18-May | 1,241 | 29-May | 1,026 |
+| 08-May | 134 | 19-May | 1,152 | 30-May | 186 |
+| 09-May | 1,662 | 20-May | 599 | 31-May | 151 |
+| 10-May | 460 | 21-May | 177 |  |  |
+| 11-May | 259 | 22-May | 143 |  |  |
+
+**June (Total: 22,149)**
+| Date | Clicks | Date | Clicks | Date | Clicks |
+|------|--------|------|--------|------|--------|
+| 01-Jun | 152 | 11-Jun | 1,134 | 21-Jun | 141 |
+| 02-Jun | 179 | 12-Jun | 234 | 22-Jun | 866 |
+| 03-Jun | 1,076 | 13-Jun | 1,402 | 23-Jun | 1,371 |
+| 04-Jun | 230 | 14-Jun | 366 | 24-Jun | 1,614 |
+| 05-Jun | 113 | 15-Jun | 482 | 25-Jun | 1,150 |
+| 06-Jun | 865 | 16-Jun | 833 | 26-Jun | 2,580 |
+| 07-Jun | 210 | 17-Jun | 331 | 27-Jun | 834 |
+| 08-Jun | 123 | 18-Jun | 190 | 28-Jun | 753 |
+| 09-Jun | 200 | 19-Jun | 1,400 | 29-Jun | 850 |
+| 10-Jun | 806 | 20-Jun | 753 | 30-Jun | 911 |
+
+**July (Total: 40,706)**
+| Date | Clicks | Date | Clicks | Date | Clicks |
+|------|--------|------|--------|------|--------|
+| 01-Jul | 387 | 12-Jul | 1,971 | 23-Jul | 463 |
+| 02-Jul | 4,360 | 13-Jul | 516 | 24-Jul | 473 |
+| 03-Jul | 571 | 14-Jul | 778 | 25-Jul | 551 |
+| 04-Jul | 1,177 | 15-Jul | 1,000 | 26-Jul | 352 |
+| 05-Jul | 383 | 16-Jul | 263 | 27-Jul | 339 |
+| 06-Jul | 563 | 17-Jul | 1,277 | 28-Jul | 469 |
+| 07-Jul | 736 | 18-Jul | 329 | 29-Jul | 384 |
+| 08-Jul | 2,727 | 19-Jul | 620 | 30-Jul | 868 |
+| 09-Jul | 487 | 20-Jul | 331 | 31-Jul | 292 |
+| 10-Jul | 916 | 21-Jul | 1,843 |  |  |
+| 11-Jul | 14,149 | 22-Jul | 1,131 |  |  |
+
+**August (Total: 9,316 - Incomplete Month)**
+| Date | Clicks | Date | Clicks | Date | Clicks |
+|------|--------|------|--------|------|--------|
+| 01-Aug | 125 | 08-Aug | 632 | 15-Aug | 225 |
+| 02-Aug | 136 | 09-Aug | 387 | 16-Aug | 884 |
+| 03-Aug | 360 | 10-Aug | 177 | 17-Aug | 258 |
+| 04-Aug | 666 | 11-Aug | 689 | 18-Aug | 123 |
+| 05-Aug | 279 | 12-Aug | 321 | 19-Aug | 225 |
+| 06-Aug | 315 | 13-Aug | 646 | 20-Aug | 929 |
+| 07-Aug | 151 | 14-Aug | 847 | 21-Aug | 772 |
+|  |  |  |  | 22-Aug | 169 |
+
+### 4.2 Funnel Conversion Stages
+
+| Stage | Logic | Data Source |
+|-------|-------|-------------|
+| **Clicks** | Static data (see table above) | External data |
+| **Leads** | Count of `application_id` grouped by month from `application_date` | Database query |
+| **KYC Done** | Applications where `stage_code` ∈ ['e', 'f', 'w', 'z', 'r2', 'x'] | Database query |
+| **KYC Pending** | Applications where `stage_code` ∈ ['c', 'd'] | Database query |
+| **Verification** | Applications where `stage_code` ∈ ['f', 'e'] | Database query |
+| **Rejected** | Applications where `stage_code` ∈ ['r', 'y'] | Database query |
+| **Approved** | Applications where `stage_code` ∈ ['z', 'w'] | Database query |
+
+### 4.3 KYC Metrics
+- **Total KYC**: KYC Done + KYC Pending
+- **KYC Done**: `stage_code` ∈ ['e', 'f', 'w', 'z', 'r2', 'x']
+- **KYC Pending**: `stage_code` ∈ ['c', 'd']
+
+## 5. Reports and Analytics
+
+### 5.1 Lead Reports
+
+#### Basic Lead Information
+| Field | Source Column | Description |
+|-------|---------------|-------------|
+| Bank Name | `bank` | Financial institution |
+| Card Name | `card_name` | Credit card product |
+| Applicant Name | `applicant_name` | Customer name |
+| Application Date | `application_date` | Submission date |
+| Quality | `application_quality` | Application quality rating |
+| Commission | `total_commission` | Commission amount |
+| Description | Map `stage_code` with Stage Map table | Stage description |
+| Stage | `stage` | Current application stage |
+
+#### Quality Overview Filter
+- Filter applications by `application_quality` field
+
+### 5.2 Lead Approval Analytics
+
+#### Key Metrics
+| Metric | Calculation |
+|--------|------------|
+| **Total Approvals** | Count where `stage_code` ∈ ['z', 'w'] |
+| **Approval Rate** | (Total Approvals / Total Leads) × 100 |
+| **Top Performing Bank** | Bank with highest approval rate |
+| **Avg Processing Days** | AVG(`decision_date` - `application_date`) |
+
+#### Top Performing Bank Report Structure
+*When sorted by Approval Rate, display order:*
+1. Rank
+2. Bank Name  
+3. Approval Rate
+4. Total Leads
+5. Total Approvals
+6. Avg Processing Time
+
+### 5.3 Rejection Analytics
+
+#### Key Metrics
+| Metric | Calculation |
+|--------|------------|
+| **Total Rejections** | Count where `stage_code` ∈ ['r', 'y'] |
+| **Rejection Rate** | (Total Rejections / Total Leads) × 100 |
+| **Top Rejection Reason** | Most frequent `rejection_reason` |
+| **Bank with Most Rejects** | Bank with highest rejection count |
+
+## 6. Technical Implementation Requirements
+
+### 6.1 Database Queries Needed
+1. Monthly lead aggregation from `application_date`
+2. Commission calculations by `stage_code` and `ops_status`
+3. Funnel conversion metrics by stage codes
+4. Bank performance analytics with approval/rejection rates
+5. Time-based filtering (current month, last 3/6 months)
+
+### 6.2 Data Processing
+1. Date parsing and month extraction from `application_date`
+2. Stage code mapping via Stage Map table
+3. Commission percentage calculations
+4. Rate calculations (approval/rejection percentages)
+5. Average processing time calculations
+
+### 6.3 Dashboard Components
+1. Time filter controls (Current, Last 3 months, Last 6 months)
+2. Commission summary cards
+3. Funnel visualization
+4. Lead reports table with sorting/filtering
+5. Bank performance comparison charts
+6. Quality overview filters
+
+## 7. Success Metrics
+- Accurate commission tracking across all statuses
+- Real-time funnel conversion visibility
+- Bank performance comparison capability
+- Quality-based application filtering
+- Historical trend analysis (3-6 month views)

@@ -62,7 +62,7 @@ export function CommissionChart({ data, title = 'Commission Breakdown' }: { data
 
 	const activeSegments = segments.filter(s => s.value > 0);
 
-	// Handle pie segment click for mobile
+	// Handle pie segment click for mobile + details panel toggle
 	const handlePieClick = (data: any, index: number, event: any) => {
 		// Get click coordinates relative to the chart container
 		const rect = event.currentTarget.getBoundingClientRect();
@@ -140,7 +140,7 @@ export function CommissionChart({ data, title = 'Commission Breakdown' }: { data
 	};
 
 	return (
-		<div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+		<div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 commission-chart">
 			{/* Header */}
 			<div className="mb-4">
 				<h2 className="text-base font-semibold text-gray-900">{title}</h2>
@@ -150,7 +150,7 @@ export function CommissionChart({ data, title = 'Commission Breakdown' }: { data
 			{/* Chart Container */}
 			<div className="relative">
 				{/* Chart */}
-				<div className="h-[220px] flex items-center justify-center relative z-10">
+				<div className="h-[220px] flex items-center justify-center relative">
 					<ResponsiveContainer width="100%" height="100%">
 							<PieChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
 							<Pie
@@ -204,23 +204,26 @@ export function CommissionChart({ data, title = 'Commission Breakdown' }: { data
 				)}
 			</div>
 
-			{/* Legend Grid - Only our custom legend */}
-			<div className="mt-6 space-y-2 commission-legend">
-				{activeSegments.map(item => (
-					<div key={item.id} className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-						<div className="flex items-center gap-3">
-							<div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
-							<span className="text-sm font-medium text-gray-700 flex items-center gap-1">
-								{item.label}
-								{DESCRIPTIONS[item.label] && (
-									<InfoTooltip side="top" text={DESCRIPTIONS[item.label]} />
-								)}
-							</span>
+			{/* Legend Grid + expandable details */}
+			<details className="mt-6 group">
+				<summary className="list-none cursor-pointer select-none rounded-lg border bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Detailed Breakdown</summary>
+				<div className="mt-3 space-y-2 commission-legend">
+					{activeSegments.map(item => (
+						<div key={item.id} className="flex items-center justify-between p-2.5 rounded-lg border border-gray-100 bg-white">
+							<div className="flex items-center gap-3">
+								<div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+								<span className="text-sm font-medium text-gray-700 flex items-center gap-1">
+									{item.label}
+									{DESCRIPTIONS[item.label] && (
+										<InfoTooltip side="top" text={DESCRIPTIONS[item.label]} />
+									)}
+								</span>
+							</div>
+							<span className="text-sm font-bold text-gray-900">{formatFullCurrency(item.value)}</span>
 						</div>
-						<span className="text-sm font-bold text-gray-900">{formatFullCurrency(item.value)}</span>
-					</div>
-				))}
-			</div>
+					))}
+				</div>
+			</details>
 
 			{/* Summary Stats */}
 			<div className="mt-4 pt-4 border-t border-gray-100">

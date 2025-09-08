@@ -132,7 +132,7 @@ export function FilterBar(props: FilterBarProps) {
               filters.timeRange.preset === 'current_month' ? 'bg-emerald-600 text-white' : 'bg-white'
             }`}
           >
-            Current
+            Current Month
           </button>
           <button
             type="button"
@@ -141,7 +141,7 @@ export function FilterBar(props: FilterBarProps) {
               filters.timeRange.preset === 'last_3_months' ? 'bg-emerald-600 text-white' : 'bg-white'
             }`}
           >
-            Last 3
+            Last 3 Months
           </button>
           <button
             type="button"
@@ -150,7 +150,7 @@ export function FilterBar(props: FilterBarProps) {
               filters.timeRange.preset === 'last_6_months' ? 'bg-emerald-600 text-white' : 'bg-white'
             }`}
           >
-            Last 6
+            Last 6 Months
           </button>
 
           {/* Application Month dropdown */}

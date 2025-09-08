@@ -1,8 +1,7 @@
 // components/quality/QualityAnalysis.tsx
 "use client";
 import React from 'react';
-import { formatCurrencyINR } from '@/lib/utils';
-import { QUALITY_LEADS, CARD_OUTS, REJECTION, POTENTIAL_COMMISSION } from '@/lib/mock/quality';
+import { QUALITY_LEADS, CARD_OUTS, REJECTION } from '@/lib/mock/quality';
 
 type QualityKey = 'good' | 'avg' | 'bad' | 'unknown';
 
@@ -31,24 +30,6 @@ export default function QualityAnalysis() {
           {keys.map((k) => (
             <CategoryCard key={k} q={k} />
           ))}
-        </div>
-      </div>
-
-      <div className="rounded-xl border bg-white p-4">
-        <h3 className="text-base font-semibold">Earnings (Potential Commission)</h3>
-        <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div>
-            <p className="text-xs text-gray-500">Potential Commission</p>
-            <p className="text-2xl font-semibold">{formatCurrencyINR(POTENTIAL_COMMISSION.total)}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">Available for payment</p>
-            <p className="text-xl font-semibold">{formatCurrencyINR(POTENTIAL_COMMISSION.availableForPayment)}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">Pending for confirmation</p>
-            <p className="text-xl font-semibold">{formatCurrencyINR(POTENTIAL_COMMISSION.pendingForConfirmation)}</p>
-          </div>
         </div>
       </div>
     </div>

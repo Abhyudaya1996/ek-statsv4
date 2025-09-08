@@ -1,12 +1,15 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Menu, X, LayoutDashboard, BarChart3, List, Filter, LineChart, CircleSlash2, Clock } from 'lucide-react';
 import { useFilters } from '@/hooks/use-filters';
 
 export function DesktopMenu() {
   const [open, setOpen] = React.useState(false);
   const { setTimePreset } = useFilters();
+  const pathname = usePathname();
+  const isActive = (href: string) => pathname === href || pathname?.startsWith(href + (href === '/' ? '' : '/'));
 
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -73,7 +76,7 @@ export function DesktopMenu() {
                 
                 <Link 
                   href="/" 
-                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors" 
+                  className={`flex items-center gap-3 rounded-xl px-3 py-3 transition-colors ${isActive('/') ? 'bg-emerald-50 text-emerald-700' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`} 
                   onClick={() => setOpen(false)}
                 >
                   <LayoutDashboard className="h-5 w-5" />
@@ -82,7 +85,7 @@ export function DesktopMenu() {
                 
                 <Link 
                   href="/funnel" 
-                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors" 
+                  className={`flex items-center gap-3 rounded-xl px-3 py-3 transition-colors ${isActive('/funnel') ? 'bg-emerald-50 text-emerald-700' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`} 
                   onClick={() => setOpen(false)}
                 >
                   <BarChart3 className="h-5 w-5" />
@@ -91,7 +94,7 @@ export function DesktopMenu() {
                 
                 <Link 
                   href="/leads/detailed" 
-                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors" 
+                  className={`flex items-center gap-3 rounded-xl px-3 py-3 transition-colors ${isActive('/leads') ? 'bg-emerald-50 text-emerald-700' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`} 
                   onClick={() => setOpen(false)}
                 >
                   <List className="h-5 w-5" />
@@ -100,7 +103,7 @@ export function DesktopMenu() {
                 
                 <Link 
                   href="/reports/approvals" 
-                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors" 
+                  className={`flex items-center gap-3 rounded-xl px-3 py-3 transition-colors ${(isActive('/reports/approval') || isActive('/reports/approvals')) ? 'bg-emerald-50 text-emerald-700' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`} 
                   onClick={() => setOpen(false)}
                 >
                   <Filter className="h-5 w-5" />
@@ -109,7 +112,7 @@ export function DesktopMenu() {
                 
                 <Link 
                   href="/reports/rejection" 
-                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors" 
+                  className={`flex items-center gap-3 rounded-xl px-3 py-3 transition-colors ${isActive('/reports/rejection') ? 'bg-emerald-50 text-emerald-700' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`} 
                   onClick={() => setOpen(false)}
                 >
                   <CircleSlash2 className="h-5 w-5" />
@@ -118,7 +121,7 @@ export function DesktopMenu() {
                 
                 <Link 
                   href="/analytics/timeline" 
-                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors" 
+                  className={`flex items-center gap-3 rounded-xl px-3 py-3 transition-colors ${isActive('/analytics/timeline') ? 'bg-emerald-50 text-emerald-700' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`} 
                   onClick={() => setOpen(false)}
                 >
                   <LineChart className="h-5 w-5" />

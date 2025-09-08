@@ -49,12 +49,7 @@ export default function ApprovalsReportPage() {
         Analyze your lead approval performance — evaluate rates and bank performance to optimize conversion strategy.
       </p>
 
-      {/* Preset chips under page title */}
-      <div className="mb-6 mt-3 flex gap-2">
-        <button className="rounded-full bg-green-600 px-4 py-2 text-sm font-medium text-white">Current</button>
-        <button className="rounded-full border bg-white px-4 py-2 text-sm font-medium text-gray-600">Last 3</button>
-        <button className="rounded-full border bg-white px-4 py-2 text-sm font-medium text-gray-600">Last 6</button>
-      </div>
+      {/* Preset chips now provided by shared FilterBar above */}
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <div className="rounded-2xl border bg-white p-4 shadow-sm">
@@ -77,11 +72,11 @@ export default function ApprovalsReportPage() {
 
       <section className="mt-6 rounded-2xl bg-white p-4 shadow-sm">
         <h2 className="mb-4 text-base font-semibold">Bank Performance Overview</h2>
-        <div className="h-[260px] sm:h-[340px] md:h-[400px]">
+        <div className="h-[320px] sm:h-[360px] md:h-[420px]">
           <BankPerformanceChart data={banks} />
         </div>
         {/* Horizontal card deck of top banks */}
-        <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+        <div className="mt-5 flex gap-3 overflow-x-auto pb-3">
           {sortedBanks.slice(0, 10).map((b: any) => (
             <button
               key={b.bank}

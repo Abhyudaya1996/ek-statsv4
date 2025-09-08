@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { FilterBar } from '@/components/filters/filter-bar';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 export default function TimelinePage() {
@@ -130,14 +130,14 @@ export default function TimelinePage() {
                 </span>
               )}
             </h2>
-            <div className="h-[200px]">
+            <div className="h-[280px] sm:h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
+                <LineChart data={chartData} margin={{ top: 36, right: 16, bottom: 12, left: 12 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey={xAxisKey} tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
+                  <XAxis dataKey={xAxisKey} tick={{ fontSize: 11 }} tickMargin={8} />
+                  <YAxis tick={{ fontSize: 11 }} width={40} />
                   <Tooltip />
-                  <Legend />
+                  <Legend verticalAlign="top" height={32} wrapperStyle={{ paddingBottom: 8, fontSize: 12 }} />
                   <Line type="monotone" dataKey="leads" stroke="#2563eb" strokeWidth={2} name="Leads" />
                   <Line type="monotone" dataKey="approved" stroke="#10B981" strokeWidth={2} name="Approvals" />
                   <Line type="monotone" dataKey="rejected" stroke="#EF4444" strokeWidth={2} name="Rejections" />
@@ -147,9 +147,9 @@ export default function TimelinePage() {
           </div>
 
           <div className="overflow-x-auto">
-            <div className="min-w-[720px] overflow-y-auto max-h-[420px] rounded-2xl bg-white shadow-sm">
-            <table className="w-full">
-              <thead className="border-b bg-gray-50">
+            <div className="min-w-[720px] overflow-auto max-h-96 rounded-2xl border bg-white p-0">
+            <table className="w-full table-fixed">
+              <thead className="sticky top-0 z-10 bg-white border-b">
                 <tr>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-500">
                     {granularity === 'monthly' ? 'Month' : 'Date'}
@@ -158,6 +158,9 @@ export default function TimelinePage() {
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-500">Leads</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-500">Approved</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-500">Rejected</th>
+                  {granularity === 'monthly' && (
+                    <th className="px-3 py-3 text-right text-xs font-medium text-gray-500" />
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -179,13 +182,17 @@ export default function TimelinePage() {
                     }}
                     role={granularity === 'monthly' ? "button" : undefined}
                     tabIndex={granularity === 'monthly' ? 0 : undefined}
-                    className={granularity === 'monthly' ? "cursor-pointer hover:bg-gray-50 focus:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-150" : ""}
+                    aria-label={granularity === 'monthly' ? `View detailed analytics for ${row.month}` : undefined}
+                    className={granularity === 'monthly' ? "cursor-pointer hover:bg-blue-50 active:bg-blue-100 focus:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-all duration-200 tap-anim touch-manipulation select-none" : ""}
                   >
                     <td className="px-3 py-3 text-sm font-medium">{row.month || row.date}</td>
                     <td className="px-3 py-3 text-right text-sm">{mode === 'pct' ? '100%' : (row.clicks || 0).toLocaleString()}</td>
                     <td className="px-3 py-3 text-right text-sm">{mode === 'pct' ? `${(((row.leads || 0) / (row.clicks || 1)) * 100).toFixed(1)}%` : (row.leads || 0)}</td>
                     <td className="px-3 py-3 text-right text-sm text-green-600">{mode === 'pct' ? `${(((row.approved || 0) / (row.leads || 1)) * 100).toFixed(1)}%` : (row.approved || 0)}</td>
                     <td className="px-3 py-3 text-right text-sm text-red-600">{mode === 'pct' ? `${(((row.rejected || 0) / (row.leads || 1)) * 100).toFixed(1)}%` : (row.rejected || 0)}</td>
+                    {granularity === 'monthly' && (
+                      <td className="px-3 py-3 text-right"><ChevronRight className="inline-block h-4 w-4 text-gray-400" /></td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -214,9 +221,9 @@ export default function TimelinePage() {
           </div>
 
           <div className="overflow-x-auto">
-            <div className="min-w-[720px] overflow-y-auto max-h-[420px] rounded-2xl bg-white shadow-sm">
-            <table className="w-full">
-              <thead className="border-b bg-gray-50">
+            <div className="min-w-[720px] overflow-auto max-h-96 rounded-2xl border bg-white p-0">
+            <table className="w-full table-fixed">
+              <thead className="sticky top-0 z-10 bg-white border-b">
                 <tr>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-500">Date</th>
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-500">Total</th>

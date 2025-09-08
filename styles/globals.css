@@ -159,12 +159,12 @@ html, body {
 .donut-chart-segment.requested { fill: #9333EA; }
 .donut-chart-segment.cancelled { fill: #F87171; }
 
-/* Force hide any Recharts built-in legends/labels for the commission chart */
-.recharts-default-legend,
-.recharts-legend-wrapper,
-.recharts-legend-item,
-.recharts-pie-label-text,
-.recharts-pie-label-line {
+/* Force hide Recharts legend/labels ONLY inside the commission chart */
+.commission-chart .recharts-default-legend,
+.commission-chart .recharts-legend-wrapper,
+.commission-chart .recharts-legend-item,
+.commission-chart .recharts-pie-label-text,
+.commission-chart .recharts-pie-label-line {
   display: none !important;
 }
 
