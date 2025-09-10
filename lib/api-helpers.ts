@@ -3,7 +3,7 @@ import type { FilterOptions } from './validations';
 import type { ApiMeta, ApiResponse as StrongApiResponse } from '@/lib/types/api';
 import { CONFIG, nowTimestamps } from '@/lib/config';
 
-export type ApiResponse<T> = StrongApiResponse<T>;
+export type ApiResponse<T extends Record<string, any>> = StrongApiResponse<T>;
 
 export function buildMeta(overrides?: Partial<ApiMeta>): ApiMeta {
   const ts = nowTimestamps();
@@ -19,7 +19,7 @@ export function buildMeta(overrides?: Partial<ApiMeta>): ApiMeta {
   };
 }
 
-export function ok<T>(data: T, metaOverrides?: Partial<ApiMeta>): ApiResponse<T> {
+export function ok<T extends Record<string, any>>(data: T, metaOverrides?: Partial<ApiMeta>): ApiResponse<T> {
   return { success: true, data, meta: buildMeta(metaOverrides) } as const;
 }
 
