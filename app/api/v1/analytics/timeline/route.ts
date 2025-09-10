@@ -38,10 +38,10 @@ export async function GET(req: NextRequest) {
     const supabase = getServerClient();
 
     const withTimeout = async <T>(p: Promise<T>, ms = 8000): Promise<T> => {
-      return await Promise.race([
+      return Promise.race([
         p,
         new Promise<T>((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
-      ]) as T;
+      ]);
     };
 
     if (view === 'month') {
@@ -52,7 +52,8 @@ export async function GET(req: NextRequest) {
         .select('application_month, stage_code', { count: 'exact' })
         .gte('application_date', monthStartIso(startMonth))
         .lt('application_date', nextMonthStartIso(endMonth));
-      const { data: rowsRaw, error } = await withTimeout(base.range(0, 20000));
+      const result = await withTimeout(base.range(0, 20000)) as { data: any[] | null; error: any };
+      const { data: rowsRaw, error } = result;
       if (error) return fail(500, 'Failed to fetch');
       const rows = rowsRaw ?? [];
       const byMonth: Record<string, any> = {};
@@ -102,7 +103,8 @@ export async function GET(req: NextRequest) {
       .gte('application_date', `${endMonth}-01`)
       .lt('application_date', new Date(Number(endMonth.split('-')[0]), Number(endMonth.split('-')[1]), 1).toISOString().slice(0,10))
       .not('application_date', 'is', null);
-    const { data: rowsRaw, error } = await withTimeout(base.range(0, 20000));
+    const result = await withTimeout(base.range(0, 20000)) as { data: any[] | null; error: any };
+    const { data: rowsRaw, error } = result;
     if (error) return fail(500, 'Failed to fetch');
     const rows = rowsRaw ?? [];
     const byDay: Record<string, any> = {};
