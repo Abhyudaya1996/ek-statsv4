@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { FiltersSchema } from '@/lib/validations';
 import { ok, fail, safePct } from '@/lib/api-helpers';
-import { getServerClient, SupabaseEnvError } from '@/lib/supabase';
+import { getServerClient, serverHasEnv, SupabaseEnvError } from '@/lib/supabase';
 import { fetchAllRows } from '@/lib/supabase-fetch';
 import { CONFIG, nowTimestamps } from '@/lib/config';
 import { readFilters, deriveMonthRangeAsync, monthStartIso, nextMonthStartIso } from '@/lib/server/range';
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       return fail(400, 'Invalid filters');
     }
 
-    if (forceMock || !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    if (forceMock || !serverHasEnv()) {
       const mock = await import('@/mock-data/reports_approval.json');
       return new Response(JSON.stringify(mock.default), { headers: { 'Content-Type': 'application/json' } });
     }

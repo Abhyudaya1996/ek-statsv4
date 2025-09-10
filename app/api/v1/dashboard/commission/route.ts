@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { FiltersSchema } from '@/lib/validations';
 import { ok, fail } from '@/lib/api-helpers';
-import { getServerClient, SupabaseEnvError } from '@/lib/supabase';
+import { getServerClient, serverHasEnv, SupabaseEnvError } from '@/lib/supabase';
 import { fetchAllRows } from '@/lib/supabase-fetch';
 import { readFilters, fetchWithFallback } from '@/lib/server/range';
 import { CONFIG, nowTimestamps } from '@/lib/config';
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     const incoming = readFilters(url.searchParams) as any;
 
-    if (useMock || !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    if (useMock || !serverHasEnv()) {
       const mock = await import('@/mock-data/dashboard.json');
       return new Response(JSON.stringify({ success: true, data: mock.default.commission }), { headers: { 'Content-Type': 'application/json' } });
     }

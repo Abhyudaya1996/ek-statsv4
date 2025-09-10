@@ -1,0 +1,25 @@
+# Prevent Vercel from considering legacy nested apps and non-app assets
+ek-statsv4/
+ek-statsv4-check/
+docs/
+wireframes/
+
+# Large or non-essential assets
+*.md
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+
+# Editor and local files
+.vscode/
+.idea/
+*.log
+node_modules/
+dist/
+build/
+out/
+

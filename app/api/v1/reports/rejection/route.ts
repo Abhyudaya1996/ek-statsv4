@@ -4,7 +4,7 @@ import { ok, fail, safePct } from '@/lib/api-helpers';
 import { fmt } from '@/lib/format';
 import { CONFIG, nowTimestamps } from '@/lib/config';
 import { readFilters, deriveMonthRange, monthStartIso, nextMonthStartIso, fetchWithFallback } from '@/lib/server/range';
-import { getServerClient, SupabaseEnvError } from '@/lib/supabase';
+import { getServerClient, serverHasEnv, SupabaseEnvError } from '@/lib/supabase';
 import { fetchAllRows } from '@/lib/supabase-fetch';
 
 export async function GET(req: NextRequest) {
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
       return fail(400, 'Invalid filters');
     }
 
-    if (forceMock || !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    if (forceMock || !serverHasEnv()) {
       const mock = await import('@/mock-data/reports_rejection.json');
       return new Response(JSON.stringify(mock.default), { headers: { 'Content-Type': 'application/json' } });
     }

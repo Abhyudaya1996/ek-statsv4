@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { FiltersSchema } from '@/lib/validations';
 import { ok, fail } from '@/lib/api-helpers';
-import { getServerClient, SupabaseEnvError } from '@/lib/supabase';
+import { getServerClient, serverHasEnv, SupabaseEnvError } from '@/lib/supabase';
 import { PRD_MONTHLY_CLICKS } from '@/lib/prd-clicks';
 import { readFilters, enumerateMonths, deriveMonthRangeAsync, monthStartIso, nextMonthStartIso } from '@/lib/server/range';
 import { STAGE_CODES, FUNNEL, LEADS_STAGE_CODES } from '@/lib/constants';
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const includeClicks = url.searchParams.get('include_clicks') === 'true';
     const debug = url.searchParams.get('debug') === '1';
     const forceMock = url.searchParams.get('mock') === '1';
-    const haveEnv = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+    const haveEnv = serverHasEnv();
 
     let filters;
     try {
