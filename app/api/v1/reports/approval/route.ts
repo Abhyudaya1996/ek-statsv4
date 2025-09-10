@@ -2,12 +2,15 @@ import { NextRequest } from 'next/server';
 import { FiltersSchema } from '@/lib/validations';
 import { ok, fail, safePct } from '@/lib/api-helpers';
 import { getServerClient, SupabaseEnvError } from '@/lib/supabase';
+import { fetchAllRows } from '@/lib/supabase-fetch';
+import { CONFIG, nowTimestamps } from '@/lib/config';
+import { readFilters, deriveMonthRangeAsync, monthStartIso, nextMonthStartIso } from '@/lib/server/range';
 
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const filtersParam = url.searchParams.get('filters');
-    const useMock = process.env.USE_MOCK === '1';
+    const forceMock = new URL(req.url).searchParams.get('mock') === '1';
 
     let filters;
     try {
@@ -16,44 +19,64 @@ export async function GET(req: NextRequest) {
       return fail(400, 'Invalid filters');
     }
 
-    if (useMock || !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    if (forceMock || !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       const mock = await import('@/mock-data/reports_approval.json');
       return new Response(JSON.stringify(mock.default), { headers: { 'Content-Type': 'application/json' } });
     }
 
     const supabase = getServerClient();
 
+    const { startMonth, endMonth } = await deriveMonthRangeAsync(readFilters(new URL(req.url).searchParams) as any);
     let query = supabase
-      .from('Raw')
-      .select('bank, stage_code, application_date, decision_date')
-      .gte('application_month', filters.timeRange.start)
-      .lte('application_month', filters.timeRange.end);
+      .from('ek_applications_v')
+      .select('bank, stage_code, application_date, decision_date, ops_status, total_commission, user_id', { count: 'exact' })
+      .gte('application_date', monthStartIso(startMonth))
+      .lt('application_date', nextMonthStartIso(endMonth));
     if ((filters as any).applicationMonth) {
-      query = query.eq('application_month', (filters as any).applicationMonth as string);
+      const m = (filters as any).applicationMonth as string;
+      query = query
+        .gte('application_date', `${m}-01`)
+        .lt('application_date', new Date(Number(m.split('-')[0]), Number(m.split('-')[1]), 1).toISOString().slice(0,10));
     }
     if ((filters as any).customRange) {
       const cr = (filters as any).customRange as { from: string; to: string };
       query = query.gte('application_date', cr.from).lte('application_date', cr.to);
     }
 
-    const { data: rows, error } = await query;
-    if (error) return fail(500, 'Failed to fetch');
+    const rows = await fetchAllRows<any>(query as any);
 
     const byBank: Record<string, { total: number; approved: number; days: number[] }> = {};
+    const parseYmd = (val: unknown): Date | null => {
+      const s = String(val ?? '');
+      if (!s) return null;
+      // Prefer strict YYYY-MM-DD; fallback for DD-MM-YYYY
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        return new Date(`${s}T00:00:00Z`);
+      }
+      const parts = s.split('-');
+      if (parts.length === 3) {
+        // Try DD-MM-YYYY → YYYY-MM-DD
+        const [d, m, y] = parts;
+        if (/^\d{2}$/.test(d) && /^\d{2}$/.test(m) && /^\d{4}$/.test(y)) {
+          return new Date(`${y}-${m}-${d}T00:00:00Z`);
+        }
+      }
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? null : d;
+    };
     for (const r of rows ?? []) {
       const bank = (r as any).bank ?? 'Unknown';
       byBank[bank] ||= { total: 0, approved: 0, days: [] };
       byBank[bank].total += 1;
-      const code = (r as any).stage_code as string;
+      const code = String((r as any).stage_code ?? '').toLowerCase();
       if (['z'].includes(code)) {
         byBank[bank].approved += 1;
-        const ad = (r as any).application_date;
-        const dd = (r as any).decision_date;
+        const ad = parseYmd((r as any).application_date);
+        const dd = parseYmd((r as any).decision_date);
         if (ad && dd) {
-          const dt1 = new Date(ad.split('-').reverse().join('-'));
-          const dt2 = new Date(dd.split('-').reverse().join('-'));
-          const diff = Math.max(0, (dt2.getTime() - dt1.getTime()) / (1000 * 60 * 60 * 24));
-          byBank[bank].days.push(diff);
+          const ms = Math.max(0, dd.getTime() - ad.getTime());
+          const diffDays = ms / (1000 * 60 * 60 * 24);
+          byBank[bank].days.push(diffDays);
         }
       }
     }
@@ -62,13 +85,13 @@ export async function GET(req: NextRequest) {
       bank,
       total: v.total,
       approved: v.approved,
-      rate: safePct(v.approved, v.total),
-      avgDays: v.days.length ? v.days.reduce((a, b) => a + b, 0) / v.days.length : null,
+      rate: Number(safePct(v.approved, v.total).toFixed(2)),
+      avgDays: v.days.length ? (v.days.reduce((a, b) => a + b, 0) / v.days.length) : null,
     }));
 
     const totalApprovals = banks.reduce((acc, b) => acc + b.approved, 0);
     const totalLeads = banks.reduce((acc, b) => acc + b.total, 0);
-    const approvalRate = safePct(totalApprovals, totalLeads);
+    const approvalRate = Number(safePct(totalApprovals, totalLeads).toFixed(2));
     const topBank = banks.slice().sort((a, b) => b.rate - a.rate)[0] || { bank: '—', rate: 0 };
     const avgProcessingDays = (() => {
       const all = banks.flatMap(b => (b.avgDays == null ? [] : [b.avgDays]));
@@ -76,8 +99,19 @@ export async function GET(req: NextRequest) {
       return all.reduce((a, b) => a + b, 0) / all.length;
     })();
 
+    const ts = nowTimestamps();
+    const meta = {
+      version: 'v1',
+      currency: CONFIG.CURRENCY,
+      rounding: { money: 'rupees0', percent: '2dp' },
+      clampMonth: CONFIG.CURRENT_DATA_MAX_MONTH,
+      generatedAt: ts.iso,
+      generatedAtIST: ts.ist,
+      timezone: ts.timezone,
+    } as const;
+
     return new Response(
-      JSON.stringify(ok({ kpis: { totalApprovals, approvalRate, topBank: { name: topBank.bank, rate: topBank.rate }, avgProcessingDays }, banks }, { version: 'v1' })),
+      JSON.stringify(ok({ kpis: { totalApprovals, approvalRate, topBank: { name: topBank.bank, rate: topBank.rate }, avgProcessingDays }, banks, meta })),
       { headers: { 'Content-Type': 'application/json' } }
     );
   } catch (e) {

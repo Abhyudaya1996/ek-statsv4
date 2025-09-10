@@ -1,12 +1,14 @@
 "use client";
 import React from 'react';
 import { useCommissionMetrics } from '@/hooks/use-commission-metrics';
+import { useFilters } from '@/hooks/use-filters';
 import { formatCurrencyINR } from '@/lib/utils';
 import InfoTooltip from '@/components/ui/InfoTooltip';
 import { TOOLTIP_COPY } from '@/lib/constants';
 
 export function CommissionKpiCards() {
-  const m = useCommissionMetrics();
+  const { filters } = useFilters();
+  const m = useCommissionMetrics(filters as any);
 
   return (
     <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">

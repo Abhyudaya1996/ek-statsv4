@@ -1,5 +1,5 @@
 export const STAGE_CODES = {
-  INCOMPLETE: ['a', 'b'] as const,
+  INCOMPLETE: ['a', 'b', 's'] as const,
   KYC: ['c', 'd'] as const,
   UNDERWRITING: ['e'] as const,
   CURING: ['f'] as const,
@@ -48,4 +48,37 @@ export const TOOLTIP_COPY = {
     avgProcessing: 'Average time from application to card-out.',
   },
 } as const;
+
+export const OPS_STATUS = {
+  Paid: 'Paid',
+  Confirmed: 'Confirmed',
+  Pending: 'Pending',
+  Cancelled: 'Cancelled',
+} as const;
+
+export const PIPELINE_10PCT: readonly string[] = [
+  ...STAGE_CODES.INCOMPLETE,
+  ...STAGE_CODES.KYC,
+  ...STAGE_CODES.UNDERWRITING,
+  ...STAGE_CODES.CURING,
+  ...STAGE_CODES.WAITING_APPROVAL,
+];
+
+// Funnel stage groupings per PRD
+export const FUNNEL = {
+  INCOMPLETE: ['a', 's'] as const, // started (or secured card applied) but incomplete
+  KYC_DONE: ['e', 'f', 'w', 'z', 'r2', 'x'] as const,
+  KYC_PENDING: ['c', 'd'] as const,
+  VERIFICATION: ['f', 'e'] as const,
+  APPROVED: ['z', 'w'] as const,
+  REJECTED: ['r', 'y'] as const,
+} as const;
+
+export const LEADS_STAGE_CODES = [
+  ...PIPELINE_10PCT,
+  ...FUNNEL.APPROVED,
+  ...FUNNEL.REJECTED,
+  ...STAGE_CODES.NON_COMMISSIONABLE,
+  's',
+] as const;
 

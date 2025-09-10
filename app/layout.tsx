@@ -8,7 +8,7 @@ import { FilterProvider } from '@/providers/filter-provider';
 import { AuthProvider } from '@/providers/auth-provider';
 import { DesktopMenu } from '@/components/layout/desktop-menu';
 import { BottomNav } from '@/components/layout/bottom-nav';
-import { StateFilter } from '@/components/filters/state-filter';
+// State filter should not appear in the global desktop header
 
 const publicSans = Public_Sans({ subsets: ['latin'], weight: ['400', '600', '700'], display: 'swap' });
 
@@ -28,14 +28,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <QueryProvider>
             <FilterProvider>
               <header className="sticky top-0 z-20 border-b bg-white px-4 py-3 md:px-6 lg:px-8">
-                <div className="mx-auto flex max-w-6xl items-center gap-3">
-                  {/* Desktop: hamburger at far-left */}
+                <div className="mx-auto flex max-w-6xl items-center justify-between">
+                  <h1 className="text-lg font-semibold text-emerald-600">EK Stats</h1>
                   <div className="hidden md:block">
                     <DesktopMenu />
                   </div>
-                  <h1 className="text-lg font-semibold text-emerald-600">EK Stats</h1>
-                  <div className="ml-auto" />
-                  <StateFilter className="hidden md:block" />
                 </div>
               </header>
               <main className="mx-auto max-w-6xl px-4 py-4 md:px-6 lg:px-8 with-bottom-nav-padding xl:pb-8">{children}</main>

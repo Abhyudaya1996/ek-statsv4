@@ -36,6 +36,16 @@ export default function Page() {
 
   const k = (kpisQ.data as any) ?? {};
   const c = (commissionQ.data as any) ?? {};
+  const chartData = {
+    total:
+      Number(c.availableForPayment ?? 0) +
+      Number(c.pendingConfirmation ?? 0) +
+      Number(c.paidCommission ?? 0),
+    potential: Number(c.potentialCommission ?? 0),
+    pending: Number(c.pendingConfirmation ?? 0),
+    paid: Number(c.paidCommission ?? 0),
+    confirmed: Number(c.availableForPayment ?? 0),
+  } as const;
 
   const KPI = ({ bg, Icon, title, value, trend, emphasis = false }: { bg: string; Icon: any; title: string; value: string; trend?: string; emphasis?: boolean }) => (
     <div className={`flex items-center space-x-4 rounded-xl border border-gray-200 ${emphasis ? 'bg-emerald-50' : 'bg-white'} p-4 shadow-sm tap-anim`}>
@@ -72,7 +82,7 @@ export default function Page() {
 
       {/* Unified chart + interactive breakdown */}
       <section className="mt-6">
-        <CommissionChart data={c} title="Commission Overview" />
+        <CommissionChart data={chartData as any} title="Commission Overview" />
       </section>
 
     </>

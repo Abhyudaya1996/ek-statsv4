@@ -2,12 +2,16 @@ import { NextRequest } from 'next/server';
 import { FiltersSchema } from '@/lib/validations';
 import { ok, fail, safePct } from '@/lib/api-helpers';
 import { getServerClient, SupabaseEnvError } from '@/lib/supabase';
+import { fetchAllRows, monthRangeToDates } from '@/lib/supabase-fetch';
+import { CONFIG } from '@/lib/config';
+import { deriveMonthRangeAsync, readFilters } from '@/lib/server/range';
+import { OPS_STATUS, STAGE_CODES } from '@/lib/constants';
 
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const filtersParam = url.searchParams.get('filters');
-    const useMock = process.env.USE_MOCK === '1';
+    const forceMock = new URL(req.url).searchParams.get('mock') === '1';
 
     let filters;
     try {
@@ -16,7 +20,7 @@ export async function GET(req: NextRequest) {
       return fail(400, 'Invalid filters');
     }
 
-    if (useMock || !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    if (forceMock || !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       const mock = await import('@/mock-data/dashboard.json');
       return new Response(
         JSON.stringify({ success: true, data: (mock as any).default.kpis }),
@@ -26,45 +30,56 @@ export async function GET(req: NextRequest) {
 
     const supabase = getServerClient();
 
-    // Simplified REAL logic placeholder: aggregate from Raw. In production, prefer mv_dashboard_kpis for single month.
-    const monthStart = filters.timeRange.start;
-    const monthEnd = filters.timeRange.end;
+    // Resolve month range considering dynamic clamp
+    const incoming = readFilters(new URL(req.url).searchParams) as any;
+    const { startMonth, endMonth } = await deriveMonthRangeAsync(incoming);
+    const { from, to } = monthRangeToDates(startMonth, endMonth);
 
     // Build base query with exact count; page through results to avoid 1k cap
     let base = supabase
-      .from('Raw')
-      .select('stage_code, total_commission, ops_status, application_date, application_month', { count: 'exact' })
-      .gte('application_month', monthStart)
-      .lte('application_month', monthEnd);
+      .from('ek_applications_v')
+      .select('stage_code, total_commission, ops_status, application_date, user_id', { count: 'exact' })
+      .gte('application_date', from)
+      .lt('application_date', to);
+    if ((filters as any).userId) {
+      base = base.eq('user_id', Number((filters as any).userId));
+    }
     if ((filters as any).applicationMonth) {
-      base = base.eq('application_month', (filters as any).applicationMonth as string);
+      const m = (filters as any).applicationMonth as string; // YYYY-MM
+      base = base.gte('application_date', `${m}-01`).lt('application_date', new Date(Number(m.split('-')[0]), Number(m.split('-')[1]), 1).toISOString().slice(0,10));
     }
     if ((filters as any).customRange) {
       const cr = (filters as any).customRange as { from: string; to: string };
+      // If customRange provided, assume 'to' is inclusive by caller; use lt on next day if needed
       base = base.gte('application_date', cr.from).lte('application_date', cr.to);
     }
 
-    const PAGE_SIZE = 1000;
-    const firstPage = await base.range(0, PAGE_SIZE - 1);
-    if (firstPage.error) return fail(500, 'Failed to fetch');
-
-    let rows = firstPage.data ?? [];
-    const totalRows = firstPage.count ?? rows.length;
-    for (let offset = rows.length; offset < totalRows; offset += PAGE_SIZE) {
-      const { data, error } = await base.range(offset, Math.min(offset + PAGE_SIZE - 1, totalRows - 1));
-      if (error) return fail(500, 'Failed to fetch');
-      if (data && data.length) rows = rows.concat(data);
-    }
+    const rows = await fetchAllRows<any>(base as any);
 
     const totalLeads = rows.length;
-    const cardouts = rows.filter(r => ['w', 'z'].includes((r as any).stage_code)).length;
-    const incomplete = rows.filter(r => ['a', 'b'].includes((r as any).stage_code)).length;
-    const totalCommission = rows.reduce((acc, r) => acc + Number((r as any).total_commission ?? 0), 0);
-    const potentialCommission = totalCommission * 0.1;
-    const approvalRate = safePct(cardouts, totalLeads);
+    const approvedCount = rows.filter(r => (r as any).stage_code === 'z').length;
+    const incomplete = rows.filter(r => (STAGE_CODES.INCOMPLETE as readonly string[]).includes((r as any).stage_code)).length;
+    const approvalRate = safePct(approvedCount, totalLeads);
 
+    const sum = (arr: any[]) => arr.reduce((s, r) => s + (Number((r as any).total_commission) || 0), 0);
+    const paidCommission = sum(rows.filter(r => (r as any).ops_status === OPS_STATUS.Paid));
+    const availablePayment = sum(rows.filter(r => (r as any).ops_status === OPS_STATUS.Confirmed));
+    const pendingConfirmation = sum(rows.filter(r => (r as any).stage_code === 'z' && (r as any).ops_status === OPS_STATUS.Pending));
+    const confirmedFromZ = sum(rows.filter(r => (r as any).stage_code === 'z'));
+    const tenPctFromOthers = sum(rows.filter(r => (r as any).stage_code !== 'z')) * CONFIG.POTENTIAL_COMMISSION_RATE;
+    const potentialCommission = confirmedFromZ + tenPctFromOthers;
+
+    const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
     return new Response(
-      JSON.stringify(ok({ totalLeads, potentialCommission, approvalRate, incomplete })),
+      JSON.stringify(ok({
+        potentialCommission: round2(potentialCommission),
+        pendingConfirmation: Math.round(pendingConfirmation),
+        availablePayment: Math.round(availablePayment),
+        paidCommission: Math.round(paidCommission),
+        totalLeads,
+        approvalRate: round2(approvalRate),
+        incomplete,
+      }, { version: 'v1' })),
       { headers: { 'Content-Type': 'application/json' } }
     );
   } catch (e) {

@@ -9,7 +9,7 @@ import { Search, Download, ChevronLeft, ChevronRight, Building2, CreditCard } fr
 import leadsMock from '@/mock-data/leads.json';
 
 // Stage filter options as labels to group into a single dropdown for compact UI
-const STAGE_OPTIONS = ['Incomplete', 'KYC', 'Verification', 'Approved', 'Rejected'] as const;
+const STAGE_OPTIONS = ['Incomplete Applications', 'KYC', 'Verification', 'Approved', 'Rejected'] as const;
 
 type LeadRow = {
   applicationId: string;
@@ -53,7 +53,7 @@ export default function DetailedLeadsPage() {
   const debouncedSearch = useDebouncedValue(search, 300);
 
   const stageFilterMap: Record<string, string[]> = {
-    Incomplete: ['a', 'b'],
+    'Incomplete Applications': ['a', 'b', 's'],
     KYC: ['c', 'd'],
     Verification: ['e', 'f'],
     Approved: ['w', 'z'],
@@ -93,6 +93,7 @@ export default function DetailedLeadsPage() {
         case 'kyc': return 'stage-badge kyc';
         case 'verification': return 'stage-badge verification';
         case 'rejected': return 'stage-badge rejected';
+        case 'incomplete applications': return 'stage-badge incomplete';
         default: return 'stage-badge incomplete';
       }
     } else {
@@ -100,7 +101,7 @@ export default function DetailedLeadsPage() {
         case 'good': return 'quality-badge good';
         case 'avg': return 'quality-badge avg';
         case 'bad': return 'quality-badge bad';
-        default: return 'quality-badge unknown';
+        default: 'quality-badge unknown';
       }
     }
   };
@@ -163,7 +164,7 @@ export default function DetailedLeadsPage() {
     );
   }
 
-  const data = q.data as { data: LeadRow[]; meta: { page: number; limit: number; total: number } } | any;
+  const data = q.data as { data: LeadRow[]; meta?: { page: number; limit: number; total: number } } | any;
   const list: LeadRow[] = Array.isArray((data as any).data) ? (data as any).data : (data as LeadRow[]);
   // Prefer API; else fallback to mock JSON
   const mockList: LeadRow[] = Array.isArray((leadsMock as any)?.data) ? ((leadsMock as any).data as LeadRow[]) : [];
@@ -188,7 +189,7 @@ export default function DetailedLeadsPage() {
         onQualityChange={setQuality}
         banks={banks}
         onBanksChange={setBanks}
-        availableBanks={Array.from(new Set(baseList.map((r: any) => String(r.bank ?? '')))).filter((b): b is string => Boolean(b))}
+        availableBanks={['HDFC', 'Axis', 'ICICI', 'SBI', 'Kotak', 'Yes Bank', 'IndusInd', 'Standard Chartered', 'HSBC', 'Citi', 'AU Small Finance', 'IDFC First', 'RBL', 'Federal', 'Kiwi New', 'Pop']}
         onApply={() => { setPage(1); }}
       />
 
@@ -230,7 +231,7 @@ export default function DetailedLeadsPage() {
       <div className="space-y-4">
         {normalizedList.slice(0, 20).map(row => (
           <div key={row.applicationId} className="rounded-xl border bg-white p-4 shadow-sm hover:shadow transition cursor-pointer" role="button" aria-label={`Open ${row.applicationId}`}>
-            <div className="flex items-start justify-between mb-3">
+            <div className="mb-3">
               <div className="flex items-center space-x-3">
                 <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-100 text-blue-600">
                   <Building2 className="w-5 h-5" />
@@ -238,21 +239,28 @@ export default function DetailedLeadsPage() {
                 <div>
                   <p className="font-semibold text-gray-900">{row.bank || '—'}</p>
                   <p className="text-xs text-gray-500 flex items-center gap-1"><CreditCard className="w-3 h-3" />{row.cardName || '—'}</p>
+                  <div className="mt-1 flex items-center gap-2 flex-wrap">
+                    <span className={getBadgeClass('stage', row.stageBucket)}>{row.stageBucket}</span>
+                    {row.description ? (
+                      <span className="text-xs text-gray-600 truncate max-w-[14rem]">{row.description}</span>
+                    ) : null}
+                  </div>
                 </div>
               </div>
-              <span className={getBadgeClass('stage', row.stageBucket)}>{row.stageBucket}</span>
             </div>
 
             <div className="space-y-1 text-sm">
               <div><span className="text-gray-500">Applicant:</span> {row.applicantName || '—'}</div>
-              <div><span className="text-gray-500">Application ID:</span> {row.applicationId}</div>
-              <div><span className="text-gray-500">Date:</span> {formatDMY(row.applicationDate)}</div>
-              <div className="flex items-center gap-2"><span className="text-gray-500">Quality:</span><span className={getBadgeClass('quality', row.quality)}>{row.quality}</span></div>
+              <div><span className="text-gray-500">Application ID:</span> {row.applicationId.length > 20 ? `${row.applicationId.slice(0,20)}...` : row.applicationId}</div>
+              <div><span className="text-gray-500">Date Applied:</span> {formatDMY(row.applicationDate)}</div>
+              <div className="flex items-center gap-2"><span className="text-gray-500">Lead Quality:</span><span className={getBadgeClass('quality', row.quality)}>{row.quality}</span></div>
             </div>
 
             <div className="mt-3 flex items-center justify-between">
               <div className="text-sm text-gray-500">Commission</div>
-              <div className="text-base font-semibold text-gray-900">{formatCurrencyINR(row.commission)}</div>
+              <div className="text-right">
+                <div className="text-base font-semibold text-gray-900">{formatCurrencyINR(row.commission)}</div>
+              </div>
             </div>
           </div>
         ))}

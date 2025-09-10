@@ -1,7 +1,8 @@
 "use client";
 import React from 'react';
 import { FiltersSchema, type FilterOptions } from '@/lib/validations';
-import { getCurrentMonth, getMonthsRange } from '@/lib/utils';
+import { getMonthsRange } from '@/lib/utils';
+import { CONFIG } from '@/lib/config';
 
 type TimePreset = 'current' | 'last3' | 'last6';
 
@@ -20,7 +21,7 @@ type FilterContextValue = {
 export const FilterContext = React.createContext<FilterContextValue | undefined>(undefined);
 
 const defaultFilters: FilterOptions = {
-  timeRange: { start: getCurrentMonth(), end: getCurrentMonth(), preset: 'current_month' },
+  timeRange: { start: CONFIG.CURRENT_DATA_MAX_MONTH, end: CONFIG.CURRENT_DATA_MAX_MONTH, preset: 'current_month' },
   banks: [],
   cards: [],
   users: [],
@@ -36,14 +37,20 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
 
   const setTimePreset = (preset: TimePreset) => {
     if (preset === 'current') {
-      const m = getCurrentMonth();
+      const m = CONFIG.CURRENT_DATA_MAX_MONTH;
       setFilters(f => ({ ...f, timeRange: { start: m, end: m, preset: 'current_month' } }));
     } else if (preset === 'last3') {
-      const r = getMonthsRange(3);
-      setFilters(f => ({ ...f, timeRange: { start: r.start, end: r.end, preset: 'last_3_months' } }));
+      const end = CONFIG.CURRENT_DATA_MAX_MONTH;
+      const [ey, em] = end.split('-').map(Number);
+      const startDate = new Date(ey, (em - 1) - (3 - 1), 1);
+      const start = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}`;
+      setFilters(f => ({ ...f, timeRange: { start, end, preset: 'last_3_months' } }));
     } else if (preset === 'last6') {
-      const r = getMonthsRange(6);
-      setFilters(f => ({ ...f, timeRange: { start: r.start, end: r.end, preset: 'last_6_months' } }));
+      const end = CONFIG.CURRENT_DATA_MAX_MONTH;
+      const [ey, em] = end.split('-').map(Number);
+      const startDate = new Date(ey, (em - 1) - (6 - 1), 1);
+      const start = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}`;
+      setFilters(f => ({ ...f, timeRange: { start, end, preset: 'last_6_months' } }));
     }
   };
 

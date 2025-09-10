@@ -1,14 +1,30 @@
 import { STAGE_CODES, type StageCode } from './constants';
 import type { FilterOptions } from './validations';
+import type { ApiMeta, ApiResponse as StrongApiResponse } from '@/lib/types/api';
+import { CONFIG, nowTimestamps } from '@/lib/config';
 
-export type ApiResponse<T> = { success: true; data: T; meta?: Record<string, unknown> } | { success: false; error: string; meta?: Record<string, unknown> };
+export type ApiResponse<T> = StrongApiResponse<T>;
 
-export function ok<T>(data: T, meta?: Record<string, unknown>): ApiResponse<T> {
-  return { success: true, data, ...(meta ? { meta } : {}) } as const;
+export function buildMeta(overrides?: Partial<ApiMeta>): ApiMeta {
+  const ts = nowTimestamps();
+  return {
+    version: 'v1',
+    currency: 'INR',
+    rounding: { money: 'rupees0', percent: '2dp' },
+    clampMonth: CONFIG.CURRENT_DATA_MAX_MONTH,
+    generatedAt: ts.iso,
+    generatedAtIST: ts.ist,
+    timezone: ts.timezone,
+    ...(overrides || {}),
+  };
+}
+
+export function ok<T>(data: T, metaOverrides?: Partial<ApiMeta>): ApiResponse<T> {
+  return { success: true, data, meta: buildMeta(metaOverrides) } as const;
 }
 
 export function fail(code: number, message: string, details?: Record<string, unknown>): Response {
-  const body = { success: false, error: message, ...(details ? { meta: details } : {}) };
+  const body = { success: false, error: message, meta: buildMeta(details as Partial<ApiMeta>) };
   return new Response(JSON.stringify(body), { status: code, headers: { 'Content-Type': 'application/json' } });
 }
 
@@ -24,8 +40,10 @@ export function mapStageBucket(code: StageCode): keyof typeof STAGE_CODES | 'UNK
   return 'UNKNOWN';
 }
 
-export async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url, { cache: 'no-store' });
+export async function fetchJson<T>(url: string, options?: { timeoutMs?: number }): Promise<T> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), Math.max(3000, options?.timeoutMs ?? 12000));
+  const res = await fetch(url, { cache: 'no-store', signal: controller.signal }).finally(() => clearTimeout(t));
   const contentType = res.headers.get('content-type') || '';
   const bodyText = await res.text();
 
@@ -53,6 +71,39 @@ export async function fetchJson<T>(url: string): Promise<T> {
   }
 
   // Non-JSON successful response (unexpected for our API)
+  throw new Error('Unexpected non-JSON response');
+}
+
+// Variant that preserves meta and success wrapper for callers that need meta
+export async function fetchJsonWithMeta<T = any>(url: string): Promise<{ success?: boolean; data: T; meta?: any }> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), 12000);
+  const res = await fetch(url, { cache: 'no-store', signal: controller.signal }).finally(() => clearTimeout(t));
+  const contentType = res.headers.get('content-type') || '';
+  const bodyText = await res.text();
+
+  let payload: any = undefined;
+  if (contentType.includes('application/json')) {
+    try {
+      payload = JSON.parse(bodyText);
+    } catch {
+      // fall through
+    }
+  }
+
+  if (!res.ok) {
+    const message = payload?.error || `${res.status} ${res.statusText}`;
+    throw new Error(message);
+  }
+
+  if (payload && payload.success === false) {
+    throw new Error(payload.error || 'Unknown error');
+  }
+
+  if (payload !== undefined) {
+    return payload as { success?: boolean; data: T; meta?: any };
+  }
+
   throw new Error('Unexpected non-JSON response');
 }
 

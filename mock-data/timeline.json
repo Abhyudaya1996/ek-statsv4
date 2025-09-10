@@ -2,13 +2,58 @@
   "success": true,
   "data": {
     "months": [
-      { "label": "2025-06", "clicks": 2800, "leads": 700, "incomplete": 180, "kyc": 140, "verification": 220, "approved": 90, "rejected": 70, "expired": 40 },
-      { "label": "2025-07", "clicks": 3200, "leads": 800, "incomplete": 200, "kyc": 150, "verification": 250, "approved": 100, "rejected": 100, "expired": 50 }
+      { "label": "2025-01", "clicks": 2100, "leads": 520, "incomplete": 130, "kyc": 95, "verification": 180, "approved": 65, "rejected": 50, "expired": 25 },
+      { "label": "2025-02", "clicks": 2300, "leads": 580, "incomplete": 145, "kyc": 105, "verification": 200, "approved": 75, "rejected": 55, "expired": 30 },
+      { "label": "2025-03", "clicks": 2500, "leads": 620, "incomplete": 155, "kyc": 115, "verification": 215, "approved": 80, "rejected": 60, "expired": 35 },
+      { "label": "2025-04", "clicks": 2700, "leads": 680, "incomplete": 170, "kyc": 125, "verification": 235, "approved": 85, "rejected": 65, "expired": 40 },
+      { "label": "2025-05", "clicks": 2900, "leads": 720, "incomplete": 180, "kyc": 135, "verification": 250, "approved": 90, "rejected": 70, "expired": 45 },
+      { "label": "2025-06", "clicks": 3100, "leads": 780, "incomplete": 195, "kyc": 145, "verification": 270, "approved": 95, "rejected": 75, "expired": 50 },
+      { "label": "2025-07", "clicks": 3300, "leads": 820, "incomplete": 205, "kyc": 155, "verification": 285, "approved": 100, "rejected": 80, "expired": 55 },
+      { "label": "2025-08", "clicks": 3500, "leads": 880, "incomplete": 220, "kyc": 165, "verification": 305, "approved": 110, "rejected": 85, "expired": 60 }
     ],
     "days": {
+      "2025-08": [
+        { "label": "2025-08-01", "clicks": 115, "leads": 28, "incomplete": 7, "kyc": 5, "verification": 10, "approved": 4, "rejected": 2, "expired": 0 },
+        { "label": "2025-08-02", "clicks": 120, "leads": 30, "incomplete": 8, "kyc": 6, "verification": 11, "approved": 3, "rejected": 2, "expired": 0 },
+        { "label": "2025-08-03", "clicks": 110, "leads": 27, "incomplete": 7, "kyc": 5, "verification": 9, "approved": 4, "rejected": 2, "expired": 0 },
+        { "label": "2025-08-04", "clicks": 125, "leads": 32, "incomplete": 8, "kyc": 6, "verification": 12, "approved": 4, "rejected": 2, "expired": 0 },
+        { "label": "2025-08-05", "clicks": 105, "leads": 26, "incomplete": 6, "kyc": 5, "verification": 9, "approved": 4, "rejected": 2, "expired": 0 }
+      ],
       "2025-07": [
         { "label": "2025-07-01", "clicks": 100, "leads": 20, "incomplete": 6, "kyc": 4, "verification": 6, "approved": 3, "rejected": 1, "expired": 0 },
         { "label": "2025-07-02", "clicks": 120, "leads": 30, "incomplete": 8, "kyc": 5, "verification": 10, "approved": 4, "rejected": 2, "expired": 1 }
+      ],
+      "2025-06": [
+        { "label": "2025-06-01", "clicks": 105, "leads": 26, "incomplete": 7, "kyc": 5, "verification": 9, "approved": 3, "rejected": 2, "expired": 0 },
+        { "label": "2025-06-02", "clicks": 110, "leads": 28, "incomplete": 7, "kyc": 5, "verification": 10, "approved": 4, "rejected": 2, "expired": 0 },
+        { "label": "2025-06-03", "clicks": 100, "leads": 25, "incomplete": 6, "kyc": 5, "verification": 8, "approved": 4, "rejected": 2, "expired": 0 }
+      ],
+      "2025-05": [
+        { "label": "2025-05-01", "clicks": 95, "leads": 24, "incomplete": 6, "kyc": 4, "verification": 8, "approved": 4, "rejected": 2, "expired": 0 },
+        { "label": "2025-05-02", "clicks": 100, "leads": 25, "incomplete": 6, "kyc": 5, "verification": 9, "approved": 3, "rejected": 2, "expired": 0 },
+        { "label": "2025-05-03", "clicks": 105, "leads": 26, "incomplete": 7, "kyc": 5, "verification": 9, "approved": 3, "rejected": 2, "expired": 0 }
+      ],
+      "2025-04": [
+        { "label": "2025-04-01", "clicks": 90, "leads": 22, "incomplete": 6, "kyc": 4, "verification": 7, "approved": 3, "rejected": 2, "expired": 0 },
+        { "label": "2025-04-02", "clicks": 95, "leads": 24, "incomplete": 6, "kyc": 4, "verification": 8, "approved": 4, "rejected": 2, "expired": 0 },
+        { "label": "2025-04-03", "clicks": 100, "leads": 25, "incomplete": 6, "kyc": 5, "verification": 9, "approved": 3, "rejected": 2, "expired": 0 }
+      ],
+      "2025-03": [
+        { "label": "2025-03-01", "clicks": 85, "leads": 21, "incomplete": 5, "kyc": 4, "verification": 7, "approved": 3, "rejected": 2, "expired": 0 },
+        { "label": "2025-03-02", "clicks": 90, "leads": 22, "incomplete": 6, "kyc": 4, "verification": 7, "approved": 3, "rejected": 2, "expired": 0 },
+        { "label": "2025-03-03", "clicks": 95, "leads": 24, "incomplete": 6, "kyc": 4, "verification": 8, "approved": 4, "rejected": 2, "expired": 0 }
+      ],
+      "2025-02": [
+        { "label": "2025-02-01", "clicks": 80, "leads": 19, "incomplete": 5, "kyc": 3, "verification": 6, "approved": 3, "rejected": 2, "expired": 0 },
+        { "label": "2025-02-02", "clicks": 85, "leads": 21, "incomplete": 5, "kyc": 4, "verification": 7, "approved": 3, "rejected": 2, "expired": 0 },
+        { "label": "2025-02-03", "clicks": 90, "leads": 22, "incomplete": 6, "kyc": 4, "verification": 7, "approved": 3, "rejected": 2, "expired": 0 },
+        { "label": "2025-02-04", "clicks": 75, "leads": 18, "incomplete": 5, "kyc": 3, "verification": 6, "approved": 2, "rejected": 2, "expired": 0 }
+      ],
+      "2025-01": [
+        { "label": "2025-01-01", "clicks": 70, "leads": 17, "incomplete": 4, "kyc": 3, "verification": 6, "approved": 2, "rejected": 2, "expired": 0 },
+        { "label": "2025-01-02", "clicks": 75, "leads": 18, "incomplete": 5, "kyc": 3, "verification": 6, "approved": 2, "rejected": 2, "expired": 0 },
+        { "label": "2025-01-03", "clicks": 80, "leads": 19, "incomplete": 5, "kyc": 3, "verification": 6, "approved": 3, "rejected": 2, "expired": 0 },
+        { "label": "2025-01-04", "clicks": 65, "leads": 16, "incomplete": 4, "kyc": 3, "verification": 5, "approved": 2, "rejected": 2, "expired": 0 }
       ]
     }
   },

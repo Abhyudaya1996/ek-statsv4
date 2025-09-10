@@ -1,11 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useFilters } from '@/hooks/use-filters';
+import { useTimeline } from '@/hooks/use-leads';
 import { FilterBar } from '@/components/filters/filter-bar';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 export default function TimelinePage() {
+  const { filters } = useFilters();
   const [view, setView] = useState<'month' | 'day' | 'breakdown'>('month');
   const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [selectedDay, setSelectedDay] = useState<string>('');
@@ -14,21 +17,14 @@ export default function TimelinePage() {
   const [granularity, setGranularity] = useState<'daily' | 'monthly'>('monthly');
   const [qualityFilter, setQualityFilter] = useState<'all' | 'good' | 'avg' | 'bad' | 'unknown'>('all');
 
-  const monthlyData = [
-    { month: 'Jul 2025', clicks: 3200, leads: 800, approved: 100, rejected: 100, kyc: 150 },
-    { month: 'Jun 2025', clicks: 2800, leads: 700, approved: 90, rejected: 80, kyc: 140 },
-    { month: 'May 2025', clicks: 3000, leads: 750, approved: 95, rejected: 85, kyc: 145 },
-  ];
+  React.useEffect(() => {
+    const m = (filters?.timeRange?.end || '').slice(0,7);
+    if (m && !selectedMonth) setSelectedMonth(m);
+  }, [filters?.timeRange?.end, selectedMonth]);
 
-  const dailyData = [
-    { date: '01 Jul', clicks: 356, leads: 89, approved: 23, rejected: 18, kyc: 48 },
-    { date: '02 Jul', clicks: 304, leads: 76, approved: 19, rejected: 15, kyc: 42 },
-    { date: '03 Jul', clicks: 408, leads: 102, approved: 28, rejected: 24, kyc: 50 },
-    { date: '04 Jul', clicks: 376, leads: 94, approved: 22, rejected: 21, kyc: 51 },
-    { date: '05 Jul', clicks: 348, leads: 87, approved: 25, rejected: 16, kyc: 46 },
-    { date: '06 Jul', clicks: 372, leads: 93, approved: 21, rejected: 19, kyc: 53 },
-    { date: '07 Jul', clicks: 312, leads: 78, approved: 18, rejected: 14, kyc: 46 },
-  ];
+  const monthParam = ((selectedMonth || filters.timeRange.end || '') as string).slice(0,7);
+  const timelineMonth = useTimeline('month', monthParam, filters, { enabled: view === 'month' && Boolean(monthParam) }) as any;
+  const timelineDay = useTimeline('day', monthParam, filters, { enabled: view === 'day' && Boolean(selectedMonth) }) as any;
 
   // Filter data based on quality
   const filterDataByQuality = (data: any[]) => {
@@ -54,6 +50,10 @@ export default function TimelinePage() {
     }));
   };
 
+  const monthRows = Array.isArray(timelineMonth.data) ? timelineMonth.data : (Array.isArray(timelineMonth.data?.timeline) ? timelineMonth.data.timeline : []);
+  const dayRows = Array.isArray(timelineDay.data) ? timelineDay.data : (Array.isArray(timelineDay.data?.timeline) ? timelineDay.data.timeline : []);
+  const monthlyData = monthRows.map((r: any) => ({ month: r.label ?? r.month, clicks: r.clicks ?? 0, leads: r.leads ?? 0, approved: r.approved ?? 0, rejected: r.rejected ?? 0, kyc: r.kyc ?? 0 }));
+  const dailyData = dayRows.map((r: any) => ({ date: r.label ?? r.date, clicks: r.clicks ?? 0, leads: r.leads ?? 0, approved: r.approved ?? 0, rejected: r.rejected ?? 0, kyc: r.kyc ?? 0 }));
   const chartData = filterDataByQuality(granularity === 'monthly' ? monthlyData : dailyData);
   const xAxisKey = granularity === 'monthly' ? 'month' : 'date';
 
@@ -131,6 +131,9 @@ export default function TimelinePage() {
               )}
             </h2>
             <div className="h-[280px] sm:h-[320px]">
+              {timelineMonth.isLoading && (
+                <div className="skeleton h-full w-full" />
+              )}
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData} margin={{ top: 36, right: 16, bottom: 12, left: 12 }}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -164,7 +167,7 @@ export default function TimelinePage() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {chartData.map(row => (
+                {chartData.map((row: any) => (
                   <tr
                     key={row.month || row.date}
                     onClick={() => {
@@ -233,7 +236,7 @@ export default function TimelinePage() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {dailyData.map(row => (
+                {dailyData.map((row: any) => (
                   <tr
                     key={row.date}
                     onClick={() => {

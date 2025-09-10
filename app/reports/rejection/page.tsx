@@ -3,6 +3,7 @@
 import React from 'react';
 import { FilterBar } from '@/components/filters/filter-bar';
 import { useFilters } from '@/hooks/use-filters';
+import { useRejectionReport } from '@/hooks/use-leads';
 import { AlertCircle, TrendingUp, XCircle, ChevronDown } from 'lucide-react';
 import { ResponsiveContainer, ComposedChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Bar, Line } from 'recharts';
 
@@ -69,33 +70,22 @@ function ResponsiveRejectionChart({ data }: { data: RejectionRow[] }) {
 
 export default function RejectionReport() {
   const { filters } = useFilters();
-  const kpis = {
-    totalRejections: 543,
-    topReason: 'Policy Reject',
-    rejectionRate: 45.3,
-    worstBank: 'HDFC',
-  };
+  const q = useRejectionReport(filters) as any;
 
-  const bankData = [
-    { bank: 'HDFC', rejected: 189, total: 420 },
-    { bank: 'Axis', rejected: 152, total: 380 },
-    { bank: 'ICICI', rejected: 102, total: 340 },
-    { bank: 'SBI', rejected: 70, total: 280 },
-  ];
+  type Kpis = { totalRejections: number; topReason: string; rejectionRate: number; worstBank: string };
+  type Bank = { bank: string; total: number; rejected: number; rate?: number };
+  type Reason = { category: string; reason: string; count: number; pctOfTotal: number };
 
-  const reasons = [
-    { category: 'Policy', reason: 'Internal Policy Reject', count: 127, percentage: 23.4 },
-    { category: 'Credit', reason: 'Low Credit Score', count: 89, percentage: 16.4 },
-    { category: 'Docs', reason: 'Incomplete Documents', count: 76, percentage: 14.0 },
-    { category: 'Income', reason: 'Income Criteria Not Met', count: 65, percentage: 12.0 },
-  ];
+  const kpis: Kpis = (q?.data?.kpis as Kpis) ?? { totalRejections: 0, topReason: '—', rejectionRate: 0, worstBank: '—' };
+  const bankData: Array<{ bank: string; rejected: number; total: number; rejectionRate: number }> = ((q?.data?.banks as Bank[]) ?? []).map((b) => ({ bank: b.bank, rejected: Number(b.rejected ?? 0), total: Number(b.total ?? 0), rejectionRate: Number(b.rate ?? ((Number(b.rejected ?? 0) / Math.max(1, Number(b.total ?? 0))) * 100)) }));
+  const reasons: Array<{ category: string; reason: string; count: number; percentage: number }> = ((q?.data?.reasons as Reason[]) ?? []).map((r) => ({ category: r.category, reason: r.reason, count: Number(r.count ?? 0), percentage: Number(r.pctOfTotal ?? 0) }));
 
   const [openIdx, setOpenIdx] = React.useState<number | null>(null);
 
   // Derive quality per bank using rejection rate; add lead mix
-  const banksWithQuality = bankData.map((b) => {
+  const banksWithQuality = bankData.map((b: { bank: string; total: number; rejected: number; rejectionRate: number }) => {
     const approvals = Math.max(0, (b.total ?? 0) - (b.rejected ?? 0));
-    const rejectionRate = (Math.max(0, b.rejected ?? 0) / Math.max(1, b.total)) * 100;
+    const rejectionRate = typeof b.rejectionRate === 'number' ? b.rejectionRate : (Math.max(0, b.rejected ?? 0) / Math.max(1, b.total)) * 100;
     let quality: 'Good' | 'Avg' | 'Bad' | 'Unknown';
     if (!b.total) quality = 'Unknown';
     else if (rejectionRate < 25) quality = 'Good';
@@ -107,6 +97,32 @@ export default function RejectionReport() {
   const filteredBanks = React.useMemo(() => (
     qualityFilter === 'all' ? banksWithQuality : banksWithQuality.filter(b => b.quality === qualityFilter)
   ), [banksWithQuality, qualityFilter]);
+
+  if (q.isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pb-20 lg:pb-0">
+        <FilterBar />
+        <div className="px-4 py-6 space-y-4">
+          <div className="skeleton h-8 w-40" />
+          <div className="grid grid-cols-2 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => <div key={i} className="rounded-2xl bg-white p-4 shadow-sm"><div className="skeleton h-16" /></div>)}
+          </div>
+          <div className="rounded-2xl bg-white p-4 shadow-sm"><div className="skeleton h-64" /></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (q.isError) {
+    return (
+      <div className="min-h-screen bg-gray-50 pb-20 lg:pb-0">
+        <FilterBar />
+        <div className="px-4 py-6">
+          <p className="text-sm text-red-600">Failed to load rejection report.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 lg:pb-0">
@@ -149,7 +165,7 @@ export default function RejectionReport() {
 
         <div className="mb-6 rounded-2xl bg-white p-4 shadow-sm">
           <h2 className="mb-4 text-base font-semibold">Leads vs Rejected (by Bank)</h2>
-          <ResponsiveRejectionChart data={banksWithQuality.map(b => ({ bank: b.bank, total: b.total, rejected: b.rejected, rejectionRate: b.rejectionRate }))} />
+          <ResponsiveRejectionChart data={banksWithQuality.map(b => ({ bank: b.bank, total: b.total, rejected: b.rejected, rejectionRate: Number(b.rejectionRate?.toFixed ? b.rejectionRate.toFixed(1) : b.rejectionRate) }))} />
 
           {/* Quality table */}
           <div className="mt-4">
@@ -214,7 +230,7 @@ export default function RejectionReport() {
             <h2 className="text-base font-semibold">Rejection Analysis</h2>
           </div>
           <div className="max-h-[360px] overflow-y-auto divide-y">
-            {reasons.map((reason, i) => {
+            {reasons.map((reason: { category: string; reason: string; count: number; percentage: number }, i: number) => {
               const isOpen = openIdx === i;
               return (
                 <button
@@ -230,12 +246,12 @@ export default function RejectionReport() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-bold text-gray-900">{reason.count}</p>
-                      <p className="text-xs text-red-600">{reason.percentage}%</p>
+                      <p className="text-xs text-red-600">{Number(reason.percentage ?? 0).toFixed(1)}%</p>
                     </div>
                   </div>
                   {isOpen && (
                     <div className="mt-2 rounded bg-gray-50 p-2 text-xs text-gray-600">
-                      Tap insights: This category represents {reason.percentage}% of total leads. Focus on documentation and policy alignment to reduce rejects.
+                      Tap insights: This category represents {Number(reason.percentage ?? 0).toFixed(1)}% of total leads. Focus on documentation and policy alignment to reduce rejects.
                     </div>
                   )}
                 </button>

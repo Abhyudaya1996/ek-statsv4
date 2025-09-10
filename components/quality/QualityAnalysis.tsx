@@ -1,7 +1,8 @@
 // components/quality/QualityAnalysis.tsx
 "use client";
 import React from 'react';
-import { QUALITY_LEADS, CARD_OUTS, REJECTION } from '@/lib/mock/quality';
+import { useFilters } from '@/hooks/use-filters';
+import { useQuality } from '@/hooks/use-quality';
 
 type QualityKey = 'good' | 'avg' | 'bad' | 'unknown';
 
@@ -20,15 +21,21 @@ const TONE_BY_KEY: Record<QualityKey, string> = {
 };
 
 export default function QualityAnalysis() {
-  const keys: QualityKey[] = ['good', 'avg', 'bad', 'unknown'];
+  const { filters } = useFilters();
+  const { data, isLoading, error } = useQuality(filters);
+  const rows: any[] = data?.byQuality ?? [];
+
+  if (isLoading) return <div className="rounded-xl border bg-white p-4">Loading quality…</div>;
+  if (error) return <div className="rounded-xl border bg-white p-4 text-red-600">Failed to load quality</div>;
+
   return (
     <div className="space-y-4">
       <div className="rounded-xl border bg-white p-4">
         <h3 className="text-base font-semibold text-gray-900">Quality Overview</h3>
-        <p className="mt-1 text-xs text-gray-600">Cards show per-quality segment metrics. Rejected Cards added for each segment.</p>
+        <p className="mt-1 text-xs text-gray-600">Live per-quality metrics with KYC breakdown.</p>
         <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {keys.map((k) => (
-            <CategoryCard key={k} q={k} />
+          {rows.map((r) => (
+            <CategoryCard key={r.quality} r={r} />
           ))}
         </div>
       </div>
@@ -36,12 +43,14 @@ export default function QualityAnalysis() {
   );
 }
 
-function CategoryCard({ q }: { q: QualityKey }) {
-  const label = LABEL_BY_KEY[q];
-  const tone = TONE_BY_KEY[q];
-  const leads = QUALITY_LEADS[q as keyof typeof QUALITY_LEADS] as number;
-  const cardouts = CARD_OUTS[q as keyof typeof CARD_OUTS] as number;
-  const rej = REJECTION[q as keyof typeof REJECTION] as { count: number; pct: number };
+function CategoryCard({ r }: { r: any }) {
+  const q = (String(r.quality || 'Unknown').toLowerCase() as QualityKey) || 'unknown';
+  const label = LABEL_BY_KEY[q] || r.quality || 'Unknown';
+  const tone = TONE_BY_KEY[q] || 'text-gray-800';
+  const leads = Number(r.leads ?? 0);
+  const cardouts = Number(r.approvals ?? 0);
+  const rejCount = Number(r.rejections ?? 0);
+  const rejPct = leads ? Number(((rejCount / leads) * 100).toFixed(2)) : 0;
   // background by quality
   const bgByQ: Record<QualityKey, string> = {
     good: 'bg-[#ecfdf5] border-[#d1fae5]',      // success bg
@@ -56,9 +65,11 @@ function CategoryCard({ q }: { q: QualityKey }) {
       </div>
       <div className="grid grid-cols-2 gap-2 text-sm">
         <Stat label="Leads" value={leads} />
-        <Stat label="Cardouts" value={cardouts} />
-        <Stat label="Rejected Cards" value={rej.count} />
-        <Stat label="Rejection Rate" value={`${rej.pct}%`} />
+        <Stat label="KYC Done" value={Number(r.kycDone ?? 0)} />
+        <Stat label="KYC Pending" value={Number(r.kycPending ?? 0)} />
+        <Stat label="Approved" value={cardouts} />
+        <Stat label="Rejected" value={rejCount} />
+        <Stat label="Rejection Rate" value={`${rejPct}%`} />
       </div>
     </section>
   );

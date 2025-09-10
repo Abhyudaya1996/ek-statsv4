@@ -17,7 +17,7 @@ type FilterBarProps = {
   onApply?: () => void;
 };
 
-const STAGE_OPTIONS = ['Incomplete', 'KYC', 'Verification', 'Approved', 'Rejected'] as const;
+const STAGE_OPTIONS = ['Incomplete Applications', 'KYC', 'Verification', 'Approved', 'Rejected'] as const;
 const QUALITY_OPTIONS = ['Good', 'Avg', 'Bad', 'Unknown'] as const;
 
 export function FilterBar(props: FilterBarProps) {
@@ -171,16 +171,10 @@ export function FilterBar(props: FilterBarProps) {
             className="rounded-md border px-3 py-1 text-sm"
           >
             <option value="">Application Month…</option>
-            {/* Basic recent list: current, last-5 months */}
-            {Array.from({ length: 6 }).map((_, i) => {
-              const d = new Date();
-              d.setMonth(d.getMonth() - i);
-              const month = String(d.getMonth() + 1).padStart(2, '0');
-              const val = `${d.getFullYear()}-${month}`;
-              return (
-                <option key={val} value={val}>{val}</option>
-              );
-            })}
+            {/* Available data months: Jan-Aug 2025 */}
+            {['2025-08', '2025-07', '2025-06', '2025-05', '2025-04', '2025-03', '2025-02', '2025-01'].map(val => (
+              <option key={val} value={val}>{val}</option>
+            ))}
           </select>
 
           {/* Custom date range */}
