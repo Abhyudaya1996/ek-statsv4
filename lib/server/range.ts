@@ -33,7 +33,7 @@ export function deriveMonthRange(incoming?: Filters): { startMonth: string; endM
 
 /** DB-aware clamp: fallback to latest available month if env clamp not set. */
 export async function deriveMonthRangeAsync(incoming?: Filters): Promise<{ startMonth: string; endMonth: string; clampMonth: string }> {
-  let clamp = CONFIG.CURRENT_DATA_MAX_MONTH;
+  let clamp: string = CONFIG.CURRENT_DATA_MAX_MONTH as string;
   try {
     if (!clamp) {
       const supabase = getServerClient();
