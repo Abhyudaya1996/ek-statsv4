@@ -6,6 +6,12 @@ export interface ApiMeta {
   generatedAt: string;
   generatedAtIST: string;
   timezone: 'Asia/Kolkata';
+  // Optional pagination fields for list endpoints
+  page?: number;
+  limit?: number;
+  total?: number;
+  // Optional range descriptor for aggregated endpoints
+  range?: { startMonth: string; endMonth: string };
 }
 
 // Keep existing API success envelope while allowing strong typing of payload merged with meta at top-level of data
