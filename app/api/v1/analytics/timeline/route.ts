@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { fail, ok } from '@/lib/api-helpers';
 import { FiltersSchema } from '@/lib/validations';
-import { readFilters } from '@/lib/server/range';
+import mockData from '@/mock-data/timeline.json';
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,8 +18,7 @@ export async function GET(req: NextRequest) {
       return fail(400, 'Invalid filters');
     }
 
-    const mock = await import('@/mock-data/timeline.json');
-    const payload = (mock as any).default;
+    const payload = mockData as any;
 
     if (view === 'day' && month && payload?.data?.days?.[month]) {
       return new Response(
