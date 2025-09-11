@@ -3,6 +3,7 @@ import { FiltersSchema } from '@/lib/validations';
 import { ok, fail, safePct } from '@/lib/api-helpers';
 import { getServerClient, serverHasEnv, SupabaseEnvError } from '@/lib/supabase';
 import { fetchAllRows, monthRangeToDates } from '@/lib/supabase-fetch';
+import { resolveDateColumn } from '@/lib/server/date-column';
 import { CONFIG } from '@/lib/config';
 import { deriveMonthRangeAsync, readFilters } from '@/lib/server/range';
 import { OPS_STATUS, STAGE_CODES } from '@/lib/constants';
@@ -34,19 +35,20 @@ export async function GET(req: NextRequest) {
     const incoming = readFilters(new URL(req.url).searchParams) as any;
     const { startMonth, endMonth } = await deriveMonthRangeAsync(incoming);
     const { from, to } = monthRangeToDates(startMonth, endMonth);
+    const dateCol = await resolveDateColumn();
 
     // Build base query with exact count; page through results to avoid 1k cap
     let base = supabase
       .from('ek_applications_v')
-      .select('stage_code, total_commission, ops_status, application_date, user_id', { count: 'exact' })
-      .gte('application_date', from)
-      .lt('application_date', to);
+      .select(`stage_code, total_commission, ops_status, ${dateCol}, user_id`, { count: 'exact' })
+      .gte(dateCol, from)
+      .lt(dateCol, to);
     if ((filters as any).userId) {
       base = base.eq('user_id', Number((filters as any).userId));
     }
     if ((filters as any).applicationMonth) {
       const m = (filters as any).applicationMonth as string; // YYYY-MM
-      base = base.gte('application_date', `${m}-01`).lt('application_date', new Date(Number(m.split('-')[0]), Number(m.split('-')[1]), 1).toISOString().slice(0,10));
+      base = base.gte(dateCol, `${m}-01`).lt(dateCol, new Date(Number(m.split('-')[0]), Number(m.split('-')[1]), 1).toISOString().slice(0,10));
     }
     if ((filters as any).customRange) {
       const cr = (filters as any).customRange as { from: string; to: string };

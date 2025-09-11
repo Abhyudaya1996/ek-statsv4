@@ -5,7 +5,3 @@ export const serialize = (v: unknown) => {
     return encodeURIComponent('{}');
   }
 };
-
-
-
-

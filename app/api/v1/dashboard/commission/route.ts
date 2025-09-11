@@ -4,6 +4,7 @@ import { ok, fail } from '@/lib/api-helpers';
 import { getServerClient, serverHasEnv, SupabaseEnvError } from '@/lib/supabase';
 import { fetchAllRows } from '@/lib/supabase-fetch';
 import { readFilters, fetchWithFallback } from '@/lib/server/range';
+import { resolveDateColumn } from '@/lib/server/date-column';
 import { CONFIG, nowTimestamps } from '@/lib/config';
 import { fmt } from '@/lib/format';
 import { OPS_STATUS } from '@/lib/constants';
@@ -22,12 +23,13 @@ export async function GET(req: NextRequest) {
 
     const supabase = getServerClient();
     
+    const dateCol = await resolveDateColumn();
     const { rows, from, to, used } = await fetchWithFallback<any>(async (fromIso, toIso) => {
       let q = supabase
         .from('ek_applications_v')
-        .select('stage_code, total_commission, ops_status, application_date, user_id', { count: 'exact' })
-        .gte('application_date', fromIso)
-        .lt('application_date', toIso);
+        .select(`stage_code, total_commission, ops_status, ${dateCol}, user_id`, { count: 'exact' })
+        .gte(dateCol, fromIso)
+        .lt(dateCol, toIso);
       const { data, error, count } = await q;
       if (error) throw new Error(error.message);
       return { rows: data ?? [], count: count ?? (data?.length ?? 0) };

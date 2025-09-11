@@ -4,6 +4,7 @@ import { ok, fail } from '@/lib/api-helpers';
 import { getServerClient, serverHasEnv, SupabaseEnvError } from '@/lib/supabase';
 import { PRD_MONTHLY_CLICKS } from '@/lib/prd-clicks';
 import { readFilters, enumerateMonths, deriveMonthRangeAsync, monthStartIso, nextMonthStartIso } from '@/lib/server/range';
+import { resolveDateColumn } from '@/lib/server/date-column';
 import { STAGE_CODES, FUNNEL, LEADS_STAGE_CODES } from '@/lib/constants';
 import { fetchAllRows } from '@/lib/supabase-fetch';
 
@@ -32,13 +33,14 @@ export async function GET(req: NextRequest) {
 
     const incoming = readFilters(new URL(req.url).searchParams) as any;
     const { startMonth, endMonth, clampMonth } = await deriveMonthRangeAsync(incoming);
+    const dateCol = await resolveDateColumn();
     const from = monthStartIso(startMonth);
     const to = nextMonthStartIso(endMonth);
     const base = supabase
       .from('ek_applications_v')
-      .select('application_id, stage_code, clean_exit, application_date, user_id', { count: 'exact' })
-      .gte('application_date', from)
-      .lt('application_date', to);
+      .select(`application_id, stage_code, clean_exit, ${dateCol}, user_id`, { count: 'exact' })
+      .gte(dateCol, from)
+      .lt(dateCol, to);
     const rawRows = await fetchAllRows<any>(base as any);
     const rows = (rawRows ?? []).map(r => ({
       ...(r as any),

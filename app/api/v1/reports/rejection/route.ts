@@ -4,6 +4,7 @@ import { ok, fail, safePct } from '@/lib/api-helpers';
 import { fmt } from '@/lib/format';
 import { CONFIG, nowTimestamps } from '@/lib/config';
 import { readFilters, deriveMonthRange, monthStartIso, nextMonthStartIso, fetchWithFallback } from '@/lib/server/range';
+import { resolveDateColumn } from '@/lib/server/date-column';
 import { getServerClient, serverHasEnv, SupabaseEnvError } from '@/lib/supabase';
 import { fetchAllRows } from '@/lib/supabase-fetch';
 
@@ -28,12 +29,13 @@ export async function GET(req: NextRequest) {
     const supabase = getServerClient();
 
     const incoming = readFilters(new URL(req.url).searchParams) as any;
+    const dateCol = await resolveDateColumn();
     const { rows, used } = await fetchWithFallback<any>(async (fromIso, toIso) => {
       const base = supabase
         .from('ek_applications_v')
-        .select('bank, stage_code, rejection_reason, rejection_category, application_date, user_id', { count: 'exact' })
-        .gte('application_date', fromIso)
-        .lt('application_date', toIso);
+        .select(`bank, stage_code, rejection_reason, rejection_category, ${dateCol}, user_id`, { count: 'exact' })
+        .gte(dateCol, fromIso)
+        .lt(dateCol, toIso);
       const { data, error, count } = await base.range(0, 20000);
       if (error) throw error;
       return { rows: data ?? [], count: count ?? (data?.length ?? 0) };

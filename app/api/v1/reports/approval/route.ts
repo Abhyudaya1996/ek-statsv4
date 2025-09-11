@@ -5,6 +5,7 @@ import { getServerClient, serverHasEnv, SupabaseEnvError } from '@/lib/supabase'
 import { fetchAllRows } from '@/lib/supabase-fetch';
 import { CONFIG, nowTimestamps } from '@/lib/config';
 import { readFilters, deriveMonthRangeAsync, monthStartIso, nextMonthStartIso } from '@/lib/server/range';
+import { resolveDateColumn } from '@/lib/server/date-column';
 
 export async function GET(req: NextRequest) {
   try {
@@ -27,20 +28,21 @@ export async function GET(req: NextRequest) {
     const supabase = getServerClient();
 
     const { startMonth, endMonth } = await deriveMonthRangeAsync(readFilters(new URL(req.url).searchParams) as any);
+    const dateCol = await resolveDateColumn();
     let query = supabase
       .from('ek_applications_v')
-      .select('bank, stage_code, application_date, decision_date, ops_status, total_commission, user_id', { count: 'exact' })
-      .gte('application_date', monthStartIso(startMonth))
-      .lt('application_date', nextMonthStartIso(endMonth));
+      .select(`bank, stage_code, ${dateCol}, decision_date, ops_status, total_commission, user_id`, { count: 'exact' })
+      .gte(dateCol, monthStartIso(startMonth))
+      .lt(dateCol, nextMonthStartIso(endMonth));
     if ((filters as any).applicationMonth) {
       const m = (filters as any).applicationMonth as string;
       query = query
-        .gte('application_date', `${m}-01`)
-        .lt('application_date', new Date(Number(m.split('-')[0]), Number(m.split('-')[1]), 1).toISOString().slice(0,10));
+        .gte(dateCol, `${m}-01`)
+        .lt(dateCol, new Date(Number(m.split('-')[0]), Number(m.split('-')[1]), 1).toISOString().slice(0,10));
     }
     if ((filters as any).customRange) {
       const cr = (filters as any).customRange as { from: string; to: string };
-      query = query.gte('application_date', cr.from).lte('application_date', cr.to);
+      query = query.gte(dateCol, cr.from).lte(dateCol, cr.to);
     }
 
     const rows = await fetchAllRows<any>(query as any);

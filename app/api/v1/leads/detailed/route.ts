@@ -3,6 +3,7 @@ import { FiltersSchema, PaginationSchema, sanitizeSearch } from '@/lib/validatio
 import { ok, fail } from '@/lib/api-helpers';
 import { getServerClient, serverHasEnv, SupabaseEnvError } from '@/lib/supabase';
 import { deriveMonthRangeAsync, readFilters, monthStartIso, nextMonthStartIso } from '@/lib/server/range';
+import { resolveDateColumn } from '@/lib/server/date-column';
 import { fetchAllRows } from '@/lib/supabase-fetch';
 import { STAGE_CODES, STAGE_LABELS } from '@/lib/constants';
 
@@ -34,11 +35,12 @@ export async function GET(req: NextRequest) {
     // Clamp to the effective data month on the server regardless of client filters
     const incoming = readFilters(new URL(req.url).searchParams) as any;
     const { startMonth, endMonth, clampMonth } = await deriveMonthRangeAsync(incoming);
+    const dateCol = await resolveDateColumn();
     let query = supabase
       .from('ek_applications_v')
       .select('*', { count: 'exact' })
-      .gte('application_date', monthStartIso(startMonth))
-      .lt('application_date', nextMonthStartIso(endMonth));
+      .gte(dateCol, monthStartIso(startMonth))
+      .lt(dateCol, nextMonthStartIso(endMonth));
 
     // If explicit application-month selection is provided, narrow to that single month
     if ((filters as any).applicationMonth) {
